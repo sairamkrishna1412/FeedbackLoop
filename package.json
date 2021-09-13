@@ -1,0 +1,18 @@
+{
+  "name": "feedback_loop",
+  "version": "1.0.0",
+  "description": "Feedback application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Sai",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "engines": {
+    "node": "14.5.0",
+    "npm": "7.20.0"
+  }
+}
