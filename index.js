@@ -35,7 +35,6 @@ app.use(passport.session());
 app.use('/auth', authRoutes);
 
 app.get('/api/current_user', (req, res) => {
-  console.log('trig', req.user);
   res.send(req.user);
 });
 
