@@ -1,0 +1,37 @@
+.campsCont {
+  background-color: #d8e4ff;
+  border-radius: 10px;
+}
+.camps {
+  min-height: 250px;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.campsRow {
+  padding-top: 2rem;
+}
+
+.campsRow span {
+  display: inline-block;
+  width: 32%;
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+}
+
+.campItem {
+  width: 90%;
+  background-color: cornflowerblue;
+  border-radius: 10px;
+  height: 100px;
+  margin: 1.5rem auto;
+}
+
+.heading {
+  font-size: 2.4rem;
+  font-weight: 400;
+}

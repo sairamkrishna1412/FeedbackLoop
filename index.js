@@ -2,11 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const cookieSession = require('cookie-session');
+const cors = require('cors');
 // const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const keys = require('./config/keys');
 
+const googleAuth = passport.authenticate('google', { session: false });
 const authRoutes = require('./routes/authRoutes');
+const creditRoutes = require('./routes/creditRoutes');
+const campaignRoutes = require('./routes/campaignRoutes');
 
 mongoose.connect(keys.mongoURI);
 
@@ -19,6 +23,7 @@ app.use(
     keys: [keys.cookieKey],
   })
 );
+app.use(cors());
 // app.use(
 //   expressSession({
 //     secret: 'keyboard cat',
@@ -33,9 +38,19 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', authRoutes);
+app.use('/campaign', campaignRoutes);
+app.use('/credits', creditRoutes);
 
-app.get('/api/current_user', (req, res) => {
-  res.send(req.user);
+app.get('/api/user', (req, res) => {
+  if (req.user) {
+    return res.status(200).json({
+      success: true,
+      data: req.user,
+    });
+  }
+  res.json({
+    success: false,
+  });
 });
 
 const PORT = process.env.PORT || 5000;

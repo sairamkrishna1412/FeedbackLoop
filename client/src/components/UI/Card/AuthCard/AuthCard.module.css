@@ -1,0 +1,13 @@
+.cardContainer {
+  margin: 5rem auto 3rem auto;
+  max-width: 35%;
+  width: 35%;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.2);
+  color: #222222;
+}
+
+.cardInner {
+  padding: 7rem 10rem;
+}

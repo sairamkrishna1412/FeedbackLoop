@@ -1,0 +1,14 @@
+.authAltLinkContainer {
+  color: #555555;
+  font-size: 2em;
+  font-weight: 300;
+}
+
+.authLinks {
+  margin: 5rem auto;
+}
+
+.authIcon {
+  width: 24px;
+  margin-right: 1.4rem;
+}

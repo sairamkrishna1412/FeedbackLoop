@@ -1,0 +1,39 @@
+.home_container {
+  width: 100%;
+  height: 90vh;
+  margin: 3rem auto;
+  background-color: #d8e4ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.homeIntro {
+  margin-bottom: 7rem;
+  text-align: center;
+}
+
+.homeIntro h1 {
+  font-size: 5rem;
+  font-weight: normal;
+  margin-bottom: 2.5rem;
+}
+
+.homeIntro p {
+  font-size: 2rem;
+  color: #4b4b4b;
+}
+
+.linkButtonsContainer {
+  display: flex;
+  justify-content: space-around;
+}
+
+.linkButton {
+  margin: auto 1rem;
+  padding: 1.7rem 5rem;
+}
+
+.arrow {
+  margin: auto 2rem;
+}

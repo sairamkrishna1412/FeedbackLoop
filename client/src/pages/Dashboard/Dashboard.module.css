@@ -1,0 +1,38 @@
+.heading {
+  font-size: 3rem;
+  text-align: center;
+  font-weight: 400;
+}
+
+.newBlock {
+  margin: 7rem auto;
+}
+
+.quickSummary {
+  /* width: 90%; */
+  min-height: 200px;
+  border-radius: 10px;
+  background-color: #d8e4ff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.newCampaignBtn {
+  position: fixed;
+  right: 6rem;
+  bottom: 5rem;
+  padding: 2rem 2.1rem;
+  border-radius: 5rem;
+  color: #fff;
+  background-color: #080808;
+}
+
+.newCampaignBtn svg {
+  font-size: 2rem;
+}
+
+.subHeading {
+  font-size: 2.4rem;
+  font-weight: 400;
+}

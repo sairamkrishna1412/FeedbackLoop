@@ -1,0 +1,36 @@
+.linkButton {
+  padding: 1.1rem 3.5rem;
+  border-radius: 3rem;
+  border: 1px solid #000000;
+  font-size: 1.5rem;
+  text-decoration: none;
+  font-weight: 300;
+  display: inline-block;
+}
+
+.linkButton:hover {
+  background: #3071fd;
+  color: #fff;
+  border: 1px solid transparent;
+  transform: translateY(-0.2rem);
+  transition: all 0.5s;
+  /* animation: linkcolor 0.5s linear 0.1s infinite normal; */
+}
+
+.buttonBlack {
+  background: #000000;
+  color: #fff;
+}
+
+.buttonWhite {
+  background: inherit;
+  color: #000000;
+}
+
+@keyframes linkcolor {
+  to {
+    background: #3071fd;
+    color: #fff;
+    border: 1px solid transparent;
+  }
+}

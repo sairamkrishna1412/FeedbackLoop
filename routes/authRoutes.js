@@ -6,21 +6,23 @@ require('../services/passport');
 const googleOAuth = passport.authenticate('google', {
   scope: ['profile', 'email'],
 });
-const facebookOAuth = passport.authenticate('facebook');
+const facebookOAuth = passport.authenticate('facebook', {
+  scope: ['email'],
+});
 
 const router = express.Router();
 
 router.get('/google', googleOAuth, authController.authGoogle);
 router.get(
   '/google/callback',
-  passport.authenticate('google'),
+  passport.authenticate('google', { failureRedirect: '/login' }),
   authController.authGoogleCallback
 );
 
 router.get('/facebook', facebookOAuth, authController.authFacebook);
 router.get(
   '/facebook/callback',
-  passport.authenticate('facebook'),
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
   authController.authFacebookCallback
 );
 

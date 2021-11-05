@@ -3,7 +3,8 @@ exports.authGoogle = (req, res) => {
 };
 
 exports.authGoogleCallback = (req, res) => {
-  res.send('Google authentication completed!!');
+  console.log('Google authentication completed!!');
+  res.redirect('/');
 };
 
 exports.authFacebook = (req, res) => {
@@ -12,10 +13,11 @@ exports.authFacebook = (req, res) => {
 
 exports.authFacebookCallback = (req, res) => {
   console.log('facebook callback triggered!');
-  res.send('Facebook authentication completed!!');
+  res.redirect('/');
+  // res.send('Facebook authentication completed!!');
 };
 
 exports.logout = (req, res) => {
   req.logout();
-  res.send(req.user);
+  res.redirect('/');
 };

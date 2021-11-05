@@ -1,0 +1,11 @@
+.featureContainer {
+  margin: 5rem auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+}
+
+.featureInner {
+  display: flex;
+  justify-content: space-around;
+}

@@ -10,17 +10,24 @@
   "author": "Sai",
   "license": "ISC",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.1.15",
     "cookie-parser": "^1.4.5",
     "cookie-session": "^1.4.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "mongoose": "^6.0.5",
+    "nodemailer": "^6.7.0",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "stripe": "^8.184.0",
+    "validator": "^13.6.0"
   },
   "engines": {
     "node": "14.15.4",
-    "npm": "7.20.5"
+    "npm": "8.1.1"
   }
 }
