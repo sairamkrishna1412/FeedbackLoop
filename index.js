@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const cookieSession = require('cookie-session');
 const cors = require('cors');
+const path = require('path');
 // const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const keys = require('./config/keys');
@@ -37,6 +38,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
 app.use('/auth', authRoutes);
 app.use('/campaign', campaignRoutes);
 app.use('/credits', creditRoutes);
@@ -51,6 +54,10 @@ app.get('/api/user', (req, res) => {
   res.json({
     success: false,
   });
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
