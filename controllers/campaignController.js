@@ -4,6 +4,7 @@ const validator = require('validator');
 const Campaign = require('../models/campaignModel');
 const Question = require('../models/questionModel');
 const CampaignEmail = require('../models/campaignEmailModel');
+const sendMail = require('../services/nodemailer');
 
 exports.newCampaign = async (req, res, next) => {
   try {
@@ -291,4 +292,55 @@ exports.updateCampaign = async (req, res, next) => {
   }
 };
 
-exports.launchCampaign = (req, res, next) => {};
+exports.launchCampaign = async (req, res, next) => {
+  try {
+    //get campaign
+    const { campaign_id } = req.body;
+
+    const campaign = await Campaign.findOne({
+      id: campaign_id,
+      user: req.user.id,
+    }).populate('campaignQuestions');
+
+    if (!campaign) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign not found',
+      });
+    }
+
+    //find associated emails
+    const emails = await CampaignEmail.find({
+      campaign: campaign_id,
+      sent: false,
+    }).select('email');
+
+    console.log(emails);
+    const emailsArr = emails.map((emailObj) => emailObj.email);
+
+    const from = `${req.user.email}`;
+    const to = emailsArr;
+    const subject = campaign.emailSubject;
+    const html = `<p>${campaign.emailContent}</p>`;
+
+    const mailSent = await sendMail(from, to, subject, html);
+    if (!mailSent) {
+      return res.status(500).json({
+        success: false,
+        message: 'Something went wrong',
+      });
+    }
+    //send nodemail emails
+    res.status(200).json({
+      success: true,
+      message: 'Mails were succesfully sent.',
+    });
+  } catch (error) {
+    console.log(error);
+    let message = error.message || 'Something went wrong, please try again!';
+    res.status(500).json({
+      success: false,
+      message,
+    });
+  }
+};
