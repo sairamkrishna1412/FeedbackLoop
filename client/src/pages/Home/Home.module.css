@@ -17,11 +17,12 @@
   font-size: 5rem;
   font-weight: normal;
   margin-bottom: 2.5rem;
+  color: #080808;
 }
 
 .homeIntro p {
   font-size: 2rem;
-  color: #4b4b4b;
+  color: #444;
 }
 
 .linkButtonsContainer {

@@ -11,34 +11,50 @@ nav ul {
   font-size: 1.5rem;
   font-weight: 400;
   text-decoration: none;
-  color: #080808;
+  color: #444;
 }
 
 .navLink.active {
   color: #333;
+  font-size: 1.8rem;
   padding-bottom: 2px;
   border-bottom: 2px solid #080808;
 }
 
-.user-icon {
+.user-icon__cont {
   position: relative;
+}
+
+.user-icon {
   font-size: 2.4rem;
+  cursor: pointer;
 }
 
 .user-menu {
   position: absolute;
   display: flex;
   flex-direction: column;
-  align-items: center;
   background-color: white;
+  min-width: 20rem;
   border-radius: 5px;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 .user-menu li {
-  font-size: 1.6em;
+  font-size: 1.5rem;
   padding: 1.5rem 0;
-  border-bottom: 1px solid #a0a0a0;
+  color: #444;
+}
+
+.user-menu li:first-of-type {
+  font-size: 1.6em;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.user-menu li:last-of-type {
+  align-self: center;
 }
 
 .navRight ul {

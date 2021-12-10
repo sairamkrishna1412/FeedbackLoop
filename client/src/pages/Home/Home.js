@@ -5,8 +5,8 @@ import LinkButton from '../../components/UI/Button/LinkButton/LinkButton';
 import Features from '../../components/Features/Features';
 import Header from '../../components/UI/Header/Header';
 
-import arrowBlack from './arrowBlack.svg';
-import arrowBlue from './arrowBlue.svg';
+// import arrowBlack from './arrowBlack.svg';
+// import arrowBlue from './arrowBlue.svg';
 import styles from './Home.module.css';
 import Loader from '../../components/UI/Loader/Loader';
 

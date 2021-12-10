@@ -1,0 +1,13 @@
+.newBlock {
+  margin: 7rem auto;
+}
+
+.quickSummary {
+  /* width: 90%; */
+  min-height: 200px;
+  border-radius: 10px;
+  background-color: #d8e4ff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}

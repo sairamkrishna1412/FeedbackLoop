@@ -1,25 +1,39 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import styles from '../Campaign.module.css';
 
+import Container from '../../UI/Container/Container';
 import CampaignItem from '../CampaignItem/CampaignItem';
 
 function CampaignCont(props) {
-  const campItems = props.items.map((el) => {
-    return <CampaignItem></CampaignItem>;
+  const campItems = props.items.map((campaign) => {
+    const campaignSummary = {
+      id: campaign._id,
+      name: campaign.campaignName,
+      recipientCount: campaign.recipientCount,
+      respondedRecipientCount: campaign.respondedRecipientCount,
+      createdOn: new Date(campaign.createdAt).toLocaleString(undefined, {
+        dateStyle: 'short',
+      }),
+    };
+    return (
+      <CampaignItem details={campaignSummary} key={campaign._id}></CampaignItem>
+    );
   });
   return (
-    <div className={`${props.className}`}>
-      <h2 className={styles.heading}>{props.heading}</h2>
-      <div className={styles.campsCont}>
+    <Fragment>
+      <h2 className="subHeading">{props.heading}</h2>
+      <Container>
+        {/* <div className={styles.campsCont}> */}
         <div className={styles.campsRow}>
           <span>Name</span>
+          <span>Created on</span>
           <span>Responded</span>
-          <span>Avg Ratings</span>
         </div>
         <div className={styles.camps}>{campItems}</div>
-      </div>
-    </div>
+        {/* </div> */}
+      </Container>
+    </Fragment>
   );
 }
 

@@ -82,7 +82,7 @@ function Nav({ isLoggedIn }) {
           <NavLink
             className={styles.navLink}
             activeClassName={styles.active}
-            to="/new"
+            to="/campaign"
           >
             New Campaign
           </NavLink>
@@ -103,15 +103,18 @@ function Nav({ isLoggedIn }) {
         </li> */}
         <li>
           <div className={styles['user-icon__cont']}>
-            <FontAwesomeIcon
-              icon={faUserAlt}
-              className={styles['user-icon']}
-              onClick={toggleUserMenu}
-            ></FontAwesomeIcon>
+            <button className={'button-default'}>
+              <FontAwesomeIcon
+                icon={faUserAlt}
+                className={styles['user-icon']}
+                onClick={toggleUserMenu}
+              ></FontAwesomeIcon>
+            </button>
           </div>
           {isMenuVisible && (
             <ul className={styles['user-menu']}>
               <li>{user.name}</li>
+              <li>Available credits : {user.credits}</li>
               <li>
                 <LinkButton to="/auth/logout" type="black" default>
                   Log Out

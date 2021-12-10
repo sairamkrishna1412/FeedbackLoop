@@ -11,15 +11,26 @@ exports.newCampaign = async (req, res, next) => {
     const user = req.user;
     // check users existing campaigns and see if campaign name is unique to user acc.
     const userCampaings = await Campaign.find({ id: user.id });
-    userCampaings.forEach((camp) => {
-      if (req.body.campaignName === camp.campaignName) {
-        return res.json({
-          success: false,
-          message:
-            'Campaign with that name already exists. Please change the campaign name',
-        });
-      }
-    });
+
+    const campaignExists = userCampaings.find(
+      (camp) => camp.campaignName == req.body.campaignName
+    );
+    if (campaignExists) {
+      return res.json({
+        success: false,
+        message:
+          'Campaign with that name already exists. Please change the campaign name',
+      });
+    }
+    // userCampaings.forEach((camp) => {
+    //   if (req.body.campaignName === camp.campaignName) {
+    //     return res.json({
+    //       success: false,
+    //       message:
+    //         'Campaign with that name already exists. Please change the campaign name',
+    //     });
+    //   }
+    // });
 
     const doc = await Campaign.create(req.body);
 
@@ -45,6 +56,10 @@ exports.campaignEmails = async (req, res, next) => {
       'email'
     );
 
+    const emailsArr = existingEmails.map((el) => el.email);
+
+    let recipientCount = existingEmails.length;
+
     const dbEmails = [];
     req.body.campaignEmails.forEach((email) => {
       if (!validator.isEmail(email)) {
@@ -53,14 +68,23 @@ exports.campaignEmails = async (req, res, next) => {
           message: `${email} is not an email. please make changes.`,
         });
       }
-      if (!existingEmails.includes(email)) {
+      if (!emailsArr.includes(email)) {
         dbEmails.push({ campaign, email, sent: false });
+        recipientCount++;
       }
     });
 
+    if (!dbEmails.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Emails already exist in campaign',
+      });
+    }
+
     //insert emails
     const docs = await CampaignEmail.insertMany(dbEmails);
-
+    //update campaign recipients property
+    await Campaign.findByIdAndUpdate(campaign, { recipientCount });
     // // check credits are available
     // if (user.credits < req.body.campaignEmails.length) {
     //   return res.status(400).json({
@@ -201,7 +225,6 @@ exports.getCampaign = async (req, res, next) => {
       campaign: req.params.id,
     }).select('email sent');
 
-    console.log(campaignEmails);
     reqCampaign.campaignEmails = campaignEmails;
 
     return res.status(200).json({
@@ -220,9 +243,7 @@ exports.getCampaign = async (req, res, next) => {
 
 exports.myCampaigns = async (req, res, next) => {
   try {
-    const campaigns = await Campaign.find({ user: req.user.id }).populate(
-      'campaignQuestions'
-    );
+    const campaigns = await Campaign.find({ user: req.user.id });
 
     return res.status(200).json({
       success: true,
@@ -241,7 +262,7 @@ exports.myCampaigns = async (req, res, next) => {
 
 exports.updateCampaign = async (req, res, next) => {
   try {
-    console.log('ran c1');
+    // console.log('ran c1');
     const { body } = req;
     const campaign = await Campaign.findById(req.params.id);
 
@@ -315,7 +336,7 @@ exports.launchCampaign = async (req, res, next) => {
       sent: false,
     }).select('email');
 
-    console.log(emails);
+    // console.log(emails);
     const emailsArr = emails.map((emailObj) => emailObj.email);
 
     const from = `${req.user.email}`;

@@ -41,9 +41,9 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 app.use('/auth', authRoutes);
-app.use('/campaign', campaignRoutes);
-app.use('/credits', creditRoutes);
 
+app.use('/api/campaign', campaignRoutes);
+app.use('/api/credits', creditRoutes);
 app.get('/api/user', (req, res) => {
   if (req.user) {
     return res.status(200).json({

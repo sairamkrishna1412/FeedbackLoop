@@ -17,7 +17,7 @@ const campaignEmailSchema = new mongoose.Schema({
     default: false,
   },
 });
-campaignEmailSchema.index({ campaign: 1, email: 1 });
+campaignEmailSchema.index({ campaign: 1, email: 1 }, { unique: true });
 const campaignEmailModel = mongoose.model('CampaignEmail', campaignEmailSchema);
 
 module.exports = campaignEmailModel;

@@ -72,9 +72,21 @@ const campaignSchema = new mongoose.Schema({
       ref: 'Question',
     },
   ],
+  respondedRecipientCount: {
+    type: Number,
+    default: 0,
+  },
+  recipientCount: {
+    type: Number,
+    default: 0,
+  },
   lastFeedback: {
     type: Date,
     default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
