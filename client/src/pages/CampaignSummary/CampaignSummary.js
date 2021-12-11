@@ -39,12 +39,18 @@ function CampaignSummary() {
       <div className={styles.newBlock}>
         <h2 className="subHeading">{campaign.campaignName}</h2>
         <div className={`${styles.quickSummary}`}>
-          <SummaryItem title="Mails Sent" value={'5 hardcoded'}></SummaryItem>
+          <SummaryItem
+            title="Mails Sent"
+            value={campaign.recipientCount}
+          ></SummaryItem>
           <SummaryItem
             title="Responses Received"
-            value={'20 hardcoded'}
+            value={campaign.respondedRecipientCount}
           ></SummaryItem>
-          <SummaryItem title="Last Feedback" value={'12/12/2000'}></SummaryItem>
+          <SummaryItem
+            title="Last Feedback"
+            value={campaign.lastFeedback || 'No responses received'}
+          ></SummaryItem>
         </div>
       </div>
       <h2 className="subHeading">Stats</h2>

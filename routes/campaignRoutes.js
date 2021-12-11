@@ -19,7 +19,7 @@ router.post('/launch', isAuth, campaignController.launchCampaign);
 // router.post('/extendMails');
 
 // when we get response from user
-router.post('/response');
+router.post('/response', campaignController.response);
 
 router
   .route('/:id')

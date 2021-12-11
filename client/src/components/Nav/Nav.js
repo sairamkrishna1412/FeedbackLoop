@@ -82,7 +82,7 @@ function Nav({ isLoggedIn }) {
           <NavLink
             className={styles.navLink}
             activeClassName={styles.active}
-            to="/campaign"
+            to="/campaign/new"
           >
             New Campaign
           </NavLink>

@@ -29,7 +29,7 @@ const questionSchema = new mongoose.Schema({
   choices: {
     type: Array,
   },
-  requiredQuestion: {
+  required: {
     type: Boolean,
     default: false,
   },

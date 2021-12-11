@@ -1,9 +1,11 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const validator = require('validator');
 // const  = require('../models/userModel');
 const Campaign = require('../models/campaignModel');
 const Question = require('../models/questionModel');
 const CampaignEmail = require('../models/campaignEmailModel');
+const Response = require('../models/responseModel');
+const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
 
 exports.newCampaign = async (req, res, next) => {
@@ -356,6 +358,85 @@ exports.launchCampaign = async (req, res, next) => {
       success: true,
       message: 'Mails were succesfully sent.',
     });
+  } catch (error) {
+    console.log(error);
+    let message = error.message || 'Something went wrong, please try again!';
+    res.status(500).json({
+      success: false,
+      message,
+    });
+  }
+};
+
+exports.response = async (req, res) => {
+  try {
+    //get campaign mails
+    const { body } = req;
+    const campaignEmails = await CampaignEmail.find({
+      campaign: body.campaign_id,
+    });
+
+    //check if user trying to submit form exists in the campaign mails
+    const feedbackUser = campaignEmails.find((el) => el.email === body.email);
+
+    if (!feedbackUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'This mail is not eligible for feedback!',
+      });
+    }
+
+    //check if or not this is users first submission (if not send message stating response for this mail already recorded)
+    if (feedbackUser.sent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Feedback from this mail is already received!',
+      });
+    }
+
+    //get campaign and questions
+    const campaign = await Campaign.findById(body.campaign_id).populate(
+      'campaignQuestions'
+    );
+    const questions = campaign.campaignQuestions;
+
+    const responses = [];
+
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      if (body.hasOwnProperty(question.id)) {
+        const response = await Response.create({
+          answer: String(body[question.id]),
+          campaign: body.campaign_id,
+          question: question.id,
+        });
+        responses.push(String(response.id));
+      } else if (question.required) {
+        return res.status(400).json({
+          success: false,
+          message: `${question.question} is a required question`,
+        });
+      }
+    }
+
+    const feedback = await Feedback.create({
+      email: body.email,
+      campaign: String(body.campaign_id),
+      responses,
+    });
+
+    await CampaignEmail.updateOne({ email: body.email }, { sent: true });
+    campaign.respondedRecipientCount += 1;
+    campaign.lastFeedback = new Date();
+    await campaign.save();
+
+    res.status(200).json({
+      success: true,
+      data: feedback,
+      message: 'Thank you, your feedback is valuable for us!',
+    });
+    // you can run others here
+    //on the request body we will need (campaign_id, <foreach question we will need question_id>, email_id)
   } catch (error) {
     console.log(error);
     let message = error.message || 'Something went wrong, please try again!';
