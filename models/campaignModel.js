@@ -88,6 +88,10 @@ const campaignSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  lauchedAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 const campaignModel = mongoose.model('Campaign', campaignSchema);

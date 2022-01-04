@@ -12,6 +12,7 @@ const googleAuth = passport.authenticate('google', { session: false });
 const authRoutes = require('./routes/authRoutes');
 const creditRoutes = require('./routes/creditRoutes');
 const campaignRoutes = require('./routes/campaignRoutes');
+const errorHandler = require('./controllers/errorController');
 
 mongoose.connect(keys.mongoURI);
 
@@ -59,6 +60,8 @@ app.get('/api/user', (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

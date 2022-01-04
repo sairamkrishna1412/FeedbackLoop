@@ -3,7 +3,9 @@ import React from 'react';
 import styles from './Container.module.css';
 
 const Container = (props) => {
-  return <div className={styles.block}>{props.children}</div>;
+  return (
+    <div className={`${styles.block} ${props.className}`}>{props.children}</div>
+  );
 };
 
 export default Container;

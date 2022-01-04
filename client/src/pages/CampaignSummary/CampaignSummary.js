@@ -15,6 +15,7 @@ function CampaignSummary() {
   const isPageLoading = useSelector((state) => state.ui.pageLoading);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const campaign = useSelector((state) => state.user.visibleCampaign);
+  // console.log(campaign);
 
   useEffect(() => {
     dispatch(userThunks.getCampaign(id));
@@ -54,7 +55,12 @@ function CampaignSummary() {
         </div>
       </div>
       <h2 className="subHeading">Stats</h2>
-      <Container></Container>
+      <Container>
+        <div className={styles.blueBlock}></div>
+        <div className={styles.blueBlock}></div>
+        <div className={styles.blueBlock}></div>
+        <div className={styles.blueBlock}></div>
+      </Container>
     </div>
   );
 }

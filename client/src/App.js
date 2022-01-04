@@ -1,4 +1,7 @@
 import React, { Fragment, useEffect } from 'react';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+
 import { Route, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
@@ -10,8 +13,11 @@ import Signup from './pages/Singup/Singup';
 // import Loader from './components/UI/Loader/Loader';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CampaignSummary from './pages/CampaignSummary/CampaignSummary';
+import NewCampaign from './pages/NewCampaign/NewCampaign';
 
 import './App.css';
+
+library.add(fas);
 
 function App() {
   const dispatch = useDispatch();
@@ -31,6 +37,9 @@ function App() {
         </Route>
         <Route path="/home" exact>
           <Home></Home>
+        </Route>
+        <Route path="/newCampaign">
+          <NewCampaign></NewCampaign>
         </Route>
         <Route path="/campaign/:id">
           <CampaignSummary></CampaignSummary>

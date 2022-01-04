@@ -21,10 +21,32 @@ router.post('/launch', isAuth, campaignController.launchCampaign);
 // when we get response from user
 router.post('/response', campaignController.response);
 
+router.get(
+  '/responses/:id',
+  campaignController.checkCampaignOwner,
+  campaignController.getResponses
+);
+
+router.get(
+  '/summary/:id',
+  campaignController.checkCampaignOwner,
+  campaignController.getSummary
+);
+
+router.patch(
+  '/clearResponses/:id',
+  campaignController.checkCampaignOwner,
+  campaignController.clearResponses
+);
+
 router
   .route('/:id')
   .get(isAuth, campaignController.getCampaign)
   .patch(isAuth, campaignController.updateCampaign)
-  .delete();
+  .delete(
+    isAuth,
+    campaignController.checkCampaignOwner,
+    campaignController.deleteCampaign
+  );
 
 module.exports = router;

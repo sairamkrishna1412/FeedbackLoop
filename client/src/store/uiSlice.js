@@ -1,16 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = { pageLoading: true };
+const initialState = {
+  initLoad: true,
+  pageLoading: 1,
+};
 
 const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
     startLoading: (state, action) => {
-      state.pageLoading = true;
+      state.pageLoading += 1;
     },
     stopLoading: (state, action) => {
-      state.pageLoading = false;
+      if (state.initLoad && state.pageLoading === 2) {
+        state.pageLoading = 0;
+        state.initLoad = false;
+      } else {
+        state.pageLoading -= 1;
+      }
     },
   },
 });

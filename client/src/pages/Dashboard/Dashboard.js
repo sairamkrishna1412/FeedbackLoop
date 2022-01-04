@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect } from 'react-router-dom';
+// import { Redirect } from 'react-router-dom';
 import Header from '../../components/UI/Header/Header';
-import Loader from '../../components/UI/Loader/Loader';
+// import Loader from '../../components/UI/Loader/Loader';
 import CampaignCont from '../../components/Campaign/CampaignCont/CampaignCont';
 import SummaryItem from '../../components/Summary/SummaryItem';
 import Container from '../../components/UI/Container/Container';
@@ -10,28 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import styles from './Dashboard.module.css';
-// import { userThunks } from '../../store/userSlice';
+import Authenticate from '../../components/Auth/Authenticate';
 
 function Dashboard() {
-  // const dispatch = useDispatch();
-  const isPageLoading = useSelector((state) => state.ui.pageLoading);
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const userState = useSelector((state) => state.user);
   const authState = useSelector((state) => state.auth);
-
-  // useEffect(() => {
-  //   dispatch(userThunks.getCampaigns());
-  // }, [dispatch]);
-
-  if (isPageLoading) {
-    return <Loader></Loader>;
-  }
-  if (!isPageLoading && !isLoggedIn) {
-    return <Redirect to="/login"></Redirect>;
-  }
-
+  const lauchedCamps = userState.campaigns.filter((el) => el.lauchedAt);
+  const unLauchedCamps = userState.campaigns.filter((el) => !el.lauchedAt);
   return (
-    <React.Fragment>
+    <Authenticate>
       <div className={`container`}>
         <Header></Header>
         {/* <h2 className={styles.heading}>Dashboard</h2> */}
@@ -48,7 +35,7 @@ function Dashboard() {
             ></SummaryItem>
             <SummaryItem
               title="Available Credits"
-              value={authState.user.credits}
+              value={authState.user ? authState.user.credits : 'N/A'}
             ></SummaryItem>
           </div>
         </Container>
@@ -62,19 +49,19 @@ function Dashboard() {
         </div> */}
         <CampaignCont
           className={styles.newBlock}
-          heading="Active Campaigns"
-          items={userState.campaigns}
+          heading="Launched Campaigns"
+          items={lauchedCamps}
         ></CampaignCont>
-        {/* <CampaignCont
+        <CampaignCont
           className={styles.newBlock}
-          heading="In-Active Campaigns"
-          items={[1]}
-        ></CampaignCont> */}
+          heading="UnLaunched Campaigns"
+          items={unLauchedCamps}
+        ></CampaignCont>
       </div>
       <div className={styles.newCampaignBtn}>
         <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
       </div>
-    </React.Fragment>
+    </Authenticate>
   );
 }
 

@@ -83,13 +83,51 @@
   padding-top: 2rem;
 }
 
-hr {
+/* hr {
   max-width: 70%;
-}
+} */
 
 .container {
   width: 70%;
   margin: auto;
+}
+
+.btn {
+  padding: 1.1rem 3.5rem;
+  border-radius: 3rem;
+  border: 1px solid #000000;
+  font-size: 1.5rem;
+  text-decoration: none;
+  font-weight: 300;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #3071fd;
+  color: #fff;
+  border: 1px solid transparent;
+  transform: translateY(-0.2rem);
+  transition: all 0.5s;
+  /* animation: linkcolor 0.5s linear 0.1s infinite normal; */
+}
+
+.btn--black {
+  background: #000000;
+  color: #fff;
+}
+
+.btn--white {
+  background: inherit;
+  color: #080808;
+}
+
+@keyframes linkcolor {
+  to {
+    background: #3071fd;
+    color: #fff;
+    border: 1px solid transparent;
+  }
 }
 
 @keyframes App-logo-spin {
@@ -99,4 +137,8 @@ hr {
   to {
     transform: rotate(360deg);
   }
+}
+
+.pointer {
+  cursor: pointer;
 }

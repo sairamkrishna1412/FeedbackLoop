@@ -11,3 +11,13 @@
   justify-content: space-around;
   align-items: center;
 }
+
+.blueBlock {
+  background-color: cornflowerblue;
+  margin: 5rem auto;
+  border-radius: 10px;
+  min-height: 20rem;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+}

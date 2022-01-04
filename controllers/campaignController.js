@@ -7,442 +7,733 @@ const CampaignEmail = require('../models/campaignEmailModel');
 const Response = require('../models/responseModel');
 const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
-exports.newCampaign = async (req, res, next) => {
-  try {
-    const user = req.user;
-    // check users existing campaigns and see if campaign name is unique to user acc.
-    const userCampaings = await Campaign.find({ id: user.id });
+exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
+  const reqCampaign = await Campaign.findById(req.params.id).lean();
 
-    const campaignExists = userCampaings.find(
-      (camp) => camp.campaignName == req.body.campaignName
+  if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
+    return next(
+      new AppError(400, 'No campaign with that id exists in your campaigns')
     );
-    if (campaignExists) {
-      return res.json({
+  }
+  req.checkedCampaign = reqCampaign;
+  next();
+});
+
+exports.newCampaign = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  req.body.user = user.id;
+  // check users existing campaigns and see if campaign name is unique to user acc.
+  const userCampaings = await Campaign.find({ id: user.id });
+
+  const campaignExists = userCampaings.find(
+    (camp) => camp.campaignName == req.body.campaignName
+  );
+  if (campaignExists) {
+    return next(
+      new AppError(
+        400,
+        'Campaign with that name already exists. Please change the campaign name'
+      )
+    );
+    // return res.json({
+    //   success: false,
+    //   message:
+    //     'Campaign with that name already exists. Please change the campaign name',
+    // });
+  }
+  // userCampaings.forEach((camp) => {
+  //   if (req.body.campaignName === camp.campaignName) {
+  //     return res.json({
+  //       success: false,
+  //       message:
+  //         'Campaign with that name already exists. Please change the campaign name',
+  //     });
+  //   }
+  // });
+
+  const doc = await Campaign.create(req.body);
+
+  return res.status(201).json({
+    success: true,
+    data: doc,
+  });
+});
+
+exports.campaignEmails = catchAsync(async (req, res, next) => {
+  //check emails
+  const { campaign_id: campaign } = req.body;
+  const existingEmails = await CampaignEmail.find({ campaign }).select('email');
+
+  const emailsArr = existingEmails.map((el) => el.email);
+
+  let recipientCount = existingEmails.length;
+
+  const dbEmails = [];
+  req.body.campaignEmails.forEach((email) => {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
         success: false,
-        message:
-          'Campaign with that name already exists. Please change the campaign name',
+        message: `${email} is not an email. please make changes.`,
       });
     }
-    // userCampaings.forEach((camp) => {
-    //   if (req.body.campaignName === camp.campaignName) {
-    //     return res.json({
-    //       success: false,
-    //       message:
-    //         'Campaign with that name already exists. Please change the campaign name',
-    //     });
-    //   }
-    // });
+    if (!emailsArr.includes(email)) {
+      dbEmails.push({ campaign, email, sent: false });
+      recipientCount++;
+    }
+  });
 
-    const doc = await Campaign.create(req.body);
-
-    return res.status(201).json({
-      success: true,
-      data: doc,
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
+  if (!dbEmails.length) {
+    return res.status(400).json({
       success: false,
-      message,
+      message: 'Emails already exist in campaign',
     });
   }
-};
 
-exports.campaignEmails = async (req, res, next) => {
-  try {
-    //check emails
-    const { campaign_id: campaign } = req.body;
-    const existingEmails = await CampaignEmail.find({ campaign }).select(
-      'email'
+  //insert emails
+  const docs = await CampaignEmail.insertMany(dbEmails);
+  //update campaign recipients property
+  await Campaign.findByIdAndUpdate(campaign, { recipientCount });
+  // // check credits are available
+  // if (user.credits < req.body.campaignEmails.length) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: `You don't have enough credits. please buy more credits.`,
+  //   });
+  // }
+
+  res.status(200).json({
+    success: true,
+    results: docs.length,
+    data: docs,
+    message:
+      'Emails already present in campaign have been removed automatically',
+  });
+});
+
+exports.campaignQuestions = catchAsync(async (req, res, next) => {
+  const body = req.body;
+  //get campaign_id to which question belongs to.
+  const campaign = await Campaign.findById(body.campaign_id);
+  if (!campaign) {
+    return res.status(400).json({
+      success: false,
+      message: `Campaign with id : ${body.campaign_id} doesn't exist.`,
+    });
+  }
+
+  // create new question doc for each question after successful validation.
+  let campaignQuestions = campaign.campaignQuestions;
+  for (const question of body.questions) {
+    const feedbackType = question.type;
+    const hasChoices =
+      feedbackType === 'checkbox' ||
+      feedbackType === 'range' ||
+      feedbackType === 'radio' ||
+      feedbackType === 'date';
+
+    if (hasChoices) {
+      let errorMessage;
+      if (
+        (feedbackType === 'range' || feedbackType === 'date') &&
+        (!question.choices.length || question.choices.length !== 3)
+      ) {
+        errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & ${
+          'step of the range' ? feedbackType === 'range' : 'default date'
+        })`;
+      }
+      if (feedbackType === 'date') {
+        const start = new Date(question.choices[0]);
+        const stop = new Date(question.choices[1]);
+        const defaultVal = new Date(
+          question.choices[2] ? question.choices[2] : question.choices[0]
+        );
+        if (start > stop) {
+          errorMessage = `Question is of type : ${feedbackType}. Start date is before Stop date. Please make changes`;
+        }
+        if (defaultVal < start || defaultVal > stop) {
+          errorMessage = `Question is of type : ${feedbackType}. Default value should lie between ${start} and ${stop}`;
+        }
+      }
+      if (!question.choices.length) {
+        errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
+      }
+      if (errorMessage) {
+        return res.status(400).json({
+          success: false,
+          message: errorMessage,
+        });
+      }
+    }
+
+    //save question and add choice id to campaignQuestions array;
+    const questionDoc = await Question.create({
+      ...question,
+    });
+    campaignQuestions.push(String(questionDoc.id));
+  }
+  // async not working as expected
+  // await body.questions.forEach(async (question, ind) => {
+  //   console.log(`ran ${ind + 1}`);
+  //   //check if it is a choice question
+  //   const feedbackType = question.type;
+  //   const hasChoices =
+  //     feedbackType === 'checkbox' ||
+  //     feedbackType === 'range' ||
+  //     feedbackType === 'radio';
+
+  //   if (hasChoices) {
+  //     let errorMessage;
+  //     if (
+  //       feedbackType === 'range' &&
+  //       (!question.choices.length || question.choices.length !== 3)
+  //     ) {
+  //       errorMessage = `Question is of type : range. choices should be an array of size 3 (start, stop & step of the range)`;
+  //     }
+  //     if (!question.choices.length) {
+  //       errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
+  //     }
+  //     if (errorMessage) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         message: errorMessage,
+  //       });
+  //     }
+  //   }
+
+  //   //save question and add choice id to campaignQuestions array;
+  //   const questionDoc = await Question.create({
+  //     ...question,
+  //   });
+  //   console.log(questionDoc.id);
+  //   campaignQuestions.push(String(questionDoc.id));
+  // });
+
+  // update campaign questions property of campaign.
+  campaign.campaignQuestions = campaignQuestions;
+  await campaign.save();
+
+  res.status(200).json({
+    success: true,
+    data: campaign,
+  });
+});
+
+exports.getCampaign = catchAsync(async (req, res, next) => {
+  // get one campaign
+  const reqCampaign = await Campaign.findById(req.params.id)
+    .populate('campaignQuestions')
+    .lean();
+
+  if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
+    return next(
+      new AppError(400, 'No campaign with that id exists in your campaigns')
     );
+  }
 
-    const emailsArr = existingEmails.map((el) => el.email);
+  const campaignEmails = await CampaignEmail.find({
+    campaign: req.params.id,
+  }).select('email sent');
 
-    let recipientCount = existingEmails.length;
+  reqCampaign.campaignEmails = campaignEmails;
 
-    const dbEmails = [];
-    req.body.campaignEmails.forEach((email) => {
+  return res.status(200).json({
+    success: true,
+    data: reqCampaign,
+  });
+});
+
+exports.myCampaigns = catchAsync(async (req, res, next) => {
+  // get my campaigns
+  const campaigns = await Campaign.find({ user: req.user.id })
+    .populate('campaignQuestions')
+    .lean();
+
+  return res.status(200).json({
+    success: true,
+    results: campaigns.length,
+    data: campaigns,
+  });
+});
+
+exports.updateCampaign = catchAsync(async (req, res, next) => {
+  const { body } = req;
+  const campaign = await Campaign.findById(req.params.id);
+
+  if (body.campaignEmails && body.campaignEmails.length) {
+    body.campaignEmails.forEach((email) => {
       if (!validator.isEmail(email)) {
-        return res.status(400).json({
-          success: false,
-          message: `${email} is not an email. please make changes.`,
-        });
+        return next(
+          new AppError(400, `${email} is not an email. please make changes.`)
+        );
       }
-      if (!emailsArr.includes(email)) {
-        dbEmails.push({ campaign, email, sent: false });
-        recipientCount++;
-      }
-    });
-
-    if (!dbEmails.length) {
-      return res.status(400).json({
-        success: false,
-        message: 'Emails already exist in campaign',
-      });
-    }
-
-    //insert emails
-    const docs = await CampaignEmail.insertMany(dbEmails);
-    //update campaign recipients property
-    await Campaign.findByIdAndUpdate(campaign, { recipientCount });
-    // // check credits are available
-    // if (user.credits < req.body.campaignEmails.length) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: `You don't have enough credits. please buy more credits.`,
-    //   });
-    // }
-
-    res.status(200).json({
-      success: true,
-      results: docs.length,
-      data: docs,
-      message: 'Emails already present have been removed automatically',
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
+      campaign.campaignEmails.push({ email, sent: false });
     });
   }
-};
-
-exports.campaignQuestions = async (req, res, next) => {
-  try {
-    const body = req.body;
-    //get campaign_id to which question belongs to.
-    const campaign = await Campaign.findById(body.campaign_id);
-    if (!campaign) {
-      return res.status(400).json({
-        success: false,
-        message: `Campaign with id : ${body.campaign_id} doesn't exist.`,
-      });
+  //delete un-updatable fields in campaign for now. (so these are the fields that cannot be directly updated as they delete the existing emails and questions in the campaign)
+  const discardProps = ['campaignEmails', 'campaignQuestions'];
+  discardProps.forEach((el) => {
+    if (body.hasOwnProperty(el)) {
+      delete body[el];
     }
+  });
 
-    let campaignQuestions = campaign.campaignQuestions;
-    for (const question of body.questions) {
-      const feedbackType = question.type;
-      const hasChoices =
-        feedbackType === 'checkbox' ||
-        feedbackType === 'range' ||
-        feedbackType === 'radio';
+  for (const prop in body) {
+    campaign[prop] = body[prop];
+  }
 
-      if (hasChoices) {
-        let errorMessage;
-        if (
-          feedbackType === 'range' &&
-          (!question.choices.length || question.choices.length !== 3)
-        ) {
-          errorMessage = `Question is of type : range. choices should be an array of size 3 (start, stop & step of the range)`;
-        }
-        if (!question.choices.length) {
-          errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
-        }
-        if (errorMessage) {
-          return res.status(400).json({
-            success: false,
-            message: errorMessage,
+  const updatedDoc = await campaign.save();
+  // const updatedDoc = await Campaign.findByIdAndUpdate(
+  //   req.params.id,
+  //   req.body,
+  //   {
+  //     new: true,
+  //     runValidators: true,
+  //   }
+  // );
+
+  res.status(200).json({
+    success: true,
+    data: updatedDoc,
+  });
+});
+
+exports.deleteCampaign = catchAsync(async (req, res, next) => {
+  // we need to delete feedbacks, responses, [respondedRecipientCount, lastFeedback] in campaign, [sent] in campaign emails, campaign doc;
+  const campaign = req.checkedCampaign;
+  campaign.campaignQuestions.forEach(async (id) => {
+    await Question.findByIdAndDelete(id);
+  });
+  await CampaignEmail.deleteMany({ campaign: campaign._id });
+  await Feedback.deleteMany({ campaign: campaign._id });
+  await Response.deleteMany({ campaign: campaign._id });
+  await Campaign.findByIdAndDelete(campaign._id);
+
+  res.status(204).json({
+    success: true,
+    message: `Campaign : ${campaign.campaignName} is deleted successfully.`,
+  });
+});
+
+exports.clearResponses = catchAsync(async (req, res, next) => {
+  // we need to delete feedbacks, responses, [respondedRecipientCount, lastFeedback] in campaign, [sent] in campaign emails;
+  const campaign = req.checkedCampaign;
+  await Feedback.deleteMany({ campaign: campaign._id });
+  await Response.deleteMany({ campaign: campaign._id });
+  await Campaign.findByIdAndUpdate(campaign._id, {
+    respondedRecipientCount: 0,
+    lastFeedback: null,
+  });
+  await CampaignEmail.updateMany(
+    { campaign: campaign._id },
+    { $set: { sent: false } }
+  );
+  res.status(204).json({
+    success: true,
+    message: `Campaign : ${campaign.campaignName}'s data is deleted successfully.'`,
+  });
+});
+
+exports.launchCampaign = catchAsync(async (req, res, next) => {
+  //get campaign
+  const { campaign_id } = req.body;
+
+  const campaign = await Campaign.findOne({
+    id: campaign_id,
+    user: req.user.id,
+  }).populate('campaignQuestions');
+
+  if (!campaign) {
+    return next(new AppError(400, 'Campaign not found.'));
+  }
+
+  //find associated emails
+  const emails = await CampaignEmail.find({
+    campaign: campaign_id,
+    sent: false,
+  }).select('email');
+
+  // console.log(emails);
+  const emailsArr = emails.map((emailObj) => emailObj.email);
+
+  const from = `${req.user.email}`;
+  const to = emailsArr;
+  const subject = campaign.emailSubject;
+  const html = `<p>${campaign.emailContent}</p>`;
+
+  const mailSent = await sendMail(from, to, subject, html);
+  if (!mailSent) {
+    return next(new AppError(500, 'Something went wrong'));
+  }
+
+  campaign.launchedAt = Date.now();
+  await campaign.save();
+  //send nodemail emails
+  res.status(200).json({
+    success: true,
+    message: 'Mails were succesfully sent.',
+  });
+});
+
+exports.response = catchAsync(async (req, res) => {
+  //get campaign mails
+  const { body } = req;
+  const campaignEmails = await CampaignEmail.find({
+    campaign: body.campaign_id,
+  });
+
+  //check if user trying to submit form exists in the campaign mails
+  const feedbackUser = campaignEmails.find((el) => el.email === body.email);
+
+  if (!feedbackUser) {
+    return res.status(400).json({
+      success: false,
+      message: 'This mail is not eligible for feedback!',
+    });
+  }
+
+  //check if or not this is users first submission (if not send message stating response for this mail already recorded)
+  if (feedbackUser.sent) {
+    return res.status(400).json({
+      success: false,
+      message: 'Feedback from this mail is already received!',
+    });
+  }
+
+  //get campaign and questions
+  const campaign = await Campaign.findById(body.campaign_id).populate(
+    'campaignQuestions'
+  );
+  const questions = campaign.campaignQuestions;
+
+  const responses = [];
+
+  // store answer for each question
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    const { type } = question;
+    if (body.hasOwnProperty(question.id)) {
+      // make checks for questions with choices
+      const answer = [];
+      if (
+        type == 'checkbox' ||
+        type == 'range' ||
+        type == 'radio' ||
+        type == 'date'
+      ) {
+        let questionResponse = body[question.id];
+        if (type === 'range') {
+          questionResponse = parseInt(questionResponse);
+          if (
+            questionResponse < question.choices[0] ||
+            questionResponse > question.choices[1]
+          ) {
+            return res.status(400).json({
+              success: false,
+              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
+            });
+          }
+
+          answer.push(String(questionResponse));
+        } else if (type == 'radio') {
+          if (!question.choices.find((el) => el === questionResponse)) {
+            return res.status(400).json({
+              success: false,
+              message: `Answer for question : ${question.question} is invalid. Choose from ${question.choices}`,
+            });
+          }
+          if (questionResponse.split().length > 1) {
+            return res.status(400).json({
+              success: false,
+              message: `Question : ${question.question} is of type radio. Select one option only`,
+            });
+          }
+
+          answer.push(String(questionResponse));
+        } else if (type == 'checkbox') {
+          questionResponse.forEach((el) => {
+            el = String(el);
+            if (question.choices.includes(el)) {
+              answer.push(el);
+            }
           });
+        } else {
+          // this is for type == date
+          if (
+            questionResponse < question.choices[0] ||
+            questionResponse > question.choices[1]
+          ) {
+            return res.status(400).json({
+              success: false,
+              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
+            });
+          }
+
+          answer.push(String(questionResponse));
         }
+      } else {
+        answer.push(String(body[question.id]));
       }
-
-      //save question and add choice id to campaignQuestions array;
-      const questionDoc = await Question.create({
-        ...question,
+      // console.log(i);
+      // create response for each question
+      const response = await Response.create({
+        answer,
+        campaign: body.campaign_id,
+        question: question.id,
       });
-      campaignQuestions.push(String(questionDoc.id));
-    }
-    // async not working as expected
-    // await body.questions.forEach(async (question, ind) => {
-    //   console.log(`ran ${ind + 1}`);
-    //   //check if it is a choice question
-    //   const feedbackType = question.type;
-    //   const hasChoices =
-    //     feedbackType === 'checkbox' ||
-    //     feedbackType === 'range' ||
-    //     feedbackType === 'radio';
-
-    //   if (hasChoices) {
-    //     let errorMessage;
-    //     if (
-    //       feedbackType === 'range' &&
-    //       (!question.choices.length || question.choices.length !== 3)
-    //     ) {
-    //       errorMessage = `Question is of type : range. choices should be an array of size 3 (start, stop & step of the range)`;
-    //     }
-    //     if (!question.choices.length) {
-    //       errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
-    //     }
-    //     if (errorMessage) {
-    //       return res.status(400).json({
-    //         success: false,
-    //         message: errorMessage,
-    //       });
-    //     }
-    //   }
-
-    //   //save question and add choice id to campaignQuestions array;
-    //   const questionDoc = await Question.create({
-    //     ...question,
-    //   });
-    //   console.log(questionDoc.id);
-    //   campaignQuestions.push(String(questionDoc.id));
-    // });
-
-    campaign.campaignQuestions = campaignQuestions;
-    await campaign.save();
-
-    res.status(200).json({
-      success: true,
-      data: campaign,
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
-  }
-};
-
-exports.getCampaign = async (req, res, next) => {
-  try {
-    const reqCampaign = await Campaign.findById(req.params.id)
-      .populate('campaignQuestions')
-      .lean();
-
-    if (String(reqCampaign.user) !== req.user.id) {
+      responses.push(String(response.id));
+    } else if (question.required) {
       return res.status(400).json({
         success: false,
-        message: 'No campaign with that id exists in your campaigns',
+        message: `${question.question} is a required question`,
       });
     }
-
-    const campaignEmails = await CampaignEmail.find({
-      campaign: req.params.id,
-    }).select('email sent');
-
-    reqCampaign.campaignEmails = campaignEmails;
-
-    return res.status(200).json({
-      success: true,
-      data: reqCampaign,
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
   }
-};
 
-exports.myCampaigns = async (req, res, next) => {
-  try {
-    const campaigns = await Campaign.find({ user: req.user.id });
+  // create a feedback doc to store all responses of questions. One whole form will have 1 feedback doc and "n" responses for "n" quesitons in form.
+  const feedback = await Feedback.create({
+    email: body.email,
+    campaign: String(body.campaign_id),
+    responses,
+  });
 
-    return res.status(200).json({
-      success: true,
-      results: campaigns.length,
-      data: campaigns,
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
-  }
-};
+  // update sent prop of campaignEmail doc
+  await CampaignEmail.updateOne(
+    { email: body.email, campaign: body.campaign_id },
+    { sent: true }
+  );
 
-exports.updateCampaign = async (req, res, next) => {
-  try {
-    // console.log('ran c1');
-    const { body } = req;
-    const campaign = await Campaign.findById(req.params.id);
+  // increase responded recipientCount;
+  campaign.respondedRecipientCount += 1;
+  campaign.lastFeedback = new Date();
+  await campaign.save();
 
-    if (body.campaignEmails && body.campaignEmails.length) {
-      body.campaignEmails.forEach((email) => {
-        if (!validator.isEmail(email)) {
-          return res.status(400).json({
-            success: false,
-            message: `${email} is not an email. please make changes.`,
-          });
-        }
-        campaign.campaignEmails.push({ email, sent: false });
-      });
-    }
-    //delete un-updatable fields in campaign for now. (so these are the fields that cannot be directly updated as they delete the existing emails and questions in the campaign)
-    const discardProps = ['campaignEmails', 'campaignQuestions'];
-    discardProps.forEach((el) => {
-      if (body.hasOwnProperty(el)) {
-        delete body[el];
-      }
-    });
+  res.status(200).json({
+    success: true,
+    data: feedback,
+    message: 'Thank you, your feedback is valuable for us!',
+  });
+  // you can run others here
+  //on the request body we will need (campaign_id, <foreach question we will need question_id>, email_id)
+});
 
-    for (const prop in body) {
-      campaign[prop] = body[prop];
-    }
+exports.getResponses = catchAsync(async (req, res) => {
+  // get responses of that campaign
+  const responses = await Response.find({ campaign: req.params.id });
+  const results = responses.length ? responses.length : 0;
+  res.status(200).json({
+    success: true,
+    results,
+    data: responses,
+  });
+});
 
-    const updatedDoc = await campaign.save();
-    // const updatedDoc = await Campaign.findByIdAndUpdate(
-    //   req.params.id,
-    //   req.body,
-    //   {
-    //     new: true,
-    //     runValidators: true,
-    //   }
-    // );
+exports.getSummary = catchAsync(async (req, res) => {
+  // get campaign
+  const campaign = await Campaign.findById(req.params.id)
+    .populate('campaignQuestions')
+    .lean();
 
-    res.status(200).json({
-      success: true,
-      data: updatedDoc,
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
-  }
-};
+  // get reponses for that campaign
+  const campaignResponses = await Response.find({
+    campaign: req.params.id,
+  }).lean();
+  campaign.responses = campaignResponses;
+  const questionCount = campaign.campaignQuestions.length;
 
-exports.launchCampaign = async (req, res, next) => {
-  try {
-    //get campaign
-    const { campaign_id } = req.body;
-
-    const campaign = await Campaign.findOne({
-      id: campaign_id,
-      user: req.user.id,
-    }).populate('campaignQuestions');
-
-    if (!campaign) {
-      return res.status(400).json({
-        success: false,
-        message: 'Campaign not found',
-      });
-    }
-
-    //find associated emails
-    const emails = await CampaignEmail.find({
-      campaign: campaign_id,
-      sent: false,
-    }).select('email');
-
-    // console.log(emails);
-    const emailsArr = emails.map((emailObj) => emailObj.email);
-
-    const from = `${req.user.email}`;
-    const to = emailsArr;
-    const subject = campaign.emailSubject;
-    const html = `<p>${campaign.emailContent}</p>`;
-
-    const mailSent = await sendMail(from, to, subject, html);
-    if (!mailSent) {
-      return res.status(500).json({
-        success: false,
-        message: 'Something went wrong',
-      });
-    }
-    //send nodemail emails
-    res.status(200).json({
-      success: true,
-      message: 'Mails were succesfully sent.',
-    });
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
-  }
-};
-
-exports.response = async (req, res) => {
-  try {
-    //get campaign mails
-    const { body } = req;
-    const campaignEmails = await CampaignEmail.find({
-      campaign: body.campaign_id,
-    });
-
-    //check if user trying to submit form exists in the campaign mails
-    const feedbackUser = campaignEmails.find((el) => el.email === body.email);
-
-    if (!feedbackUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'This mail is not eligible for feedback!',
-      });
-    }
-
-    //check if or not this is users first submission (if not send message stating response for this mail already recorded)
-    if (feedbackUser.sent) {
-      return res.status(400).json({
-        success: false,
-        message: 'Feedback from this mail is already received!',
-      });
-    }
-
-    //get campaign and questions
-    const campaign = await Campaign.findById(body.campaign_id).populate(
-      'campaignQuestions'
+  //generate summary
+  // let start = Date.now();
+  const summaryObj = {};
+  for (let i = 0; i < questionCount; i++) {
+    const question = campaign.campaignQuestions[i];
+    const questionResponses = campaignResponses.filter(
+      (el) => String(el.question) === String(question._id)
     );
-    const questions = campaign.campaignQuestions;
+    console.log(questionResponses);
+    const stats = calcSummary(question, questionResponses);
+    summaryObj[question._id] = stats;
+  }
+  // console.log('Time elapsed : ', (Date.now() - start) / 1000);
 
-    const responses = [];
+  res.status(200).json({
+    success: true,
+    data: summaryObj,
+  });
+});
 
-    for (let i = 0; i < questions.length; i++) {
-      const question = questions[i];
-      if (body.hasOwnProperty(question.id)) {
-        const response = await Response.create({
-          answer: String(body[question.id]),
-          campaign: body.campaign_id,
-          question: question.id,
-        });
-        responses.push(String(response.id));
-      } else if (question.required) {
-        return res.status(400).json({
-          success: false,
-          message: `${question.question} is a required question`,
-        });
+const calcSummary = (question, responses) => {
+  //takes a question and its corresponding responses to generate summary for it
+  const summary = { ...question };
+  delete summary._id;
+  delete summary.__v;
+  stats = {};
+
+  // for type = number
+  if (question.type === 'number') {
+    let max = (min = parseInt(responses[0].answer));
+    let sum = 0,
+      valCounts = {};
+
+    valCounts[responses[0].answer] = 1;
+    for (let i = 1; i < responses.length; i++) {
+      const val = parseInt(responses[i].answer);
+      max = Math.max(max, val);
+      min = Math.min(min, val);
+      sum += val;
+
+      if (Object.keys(valCounts).length <= 100) {
+        if (!valCounts.hasOwnProperty(val)) {
+          valCounts[val] = 1;
+        } else {
+          valCounts[val] += 1;
+        }
+      } else {
+        valCounts = {};
       }
     }
 
-    const feedback = await Feedback.create({
-      email: body.email,
-      campaign: String(body.campaign_id),
-      responses,
+    stats.max = max;
+    stats.min = min;
+    stats.average = sum / responses.length;
+
+    let valCountKeys = Object.keys(valCounts);
+
+    valCountKeys.sort((a, b) => {
+      return valCounts[a] - valCounts[b];
     });
 
-    await CampaignEmail.updateOne({ email: body.email }, { sent: true });
-    campaign.respondedRecipientCount += 1;
-    campaign.lastFeedback = new Date();
-    await campaign.save();
-
-    res.status(200).json({
-      success: true,
-      data: feedback,
-      message: 'Thank you, your feedback is valuable for us!',
-    });
-    // you can run others here
-    //on the request body we will need (campaign_id, <foreach question we will need question_id>, email_id)
-  } catch (error) {
-    console.log(error);
-    let message = error.message || 'Something went wrong, please try again!';
-    res.status(500).json({
-      success: false,
-      message,
-    });
+    stats.valCountOrdered = valCountKeys;
+    stats.valCounts = valCounts;
   }
+
+  // for type = range, checkbox, radio
+  else if (
+    question.type === 'range' ||
+    question.type === 'checkbox' ||
+    question.type === 'radio'
+  ) {
+    let responsesArr = [];
+    for (let i = 0; i < responses.length; i++) {
+      const answers = responses[i].answer;
+      responsesArr = responsesArr.concat(answers);
+    }
+    const valCountsAndOrder = calcValCountsAndOrder(
+      responsesArr,
+      responses.length
+    );
+    stats.valCounts = valCountsAndOrder[0];
+    stats.valCountOrdered = valCountsAndOrder[1];
+  }
+
+  // for type = date
+  else if (question.type === 'date') {
+    const daysGap =
+      (new Date(question.choices[1]).getTime() -
+        new Date(question.choices[0]).getTime()) /
+      (1000 * 60 * 60 * 24);
+    //we will calculate for max days gap of 370 days
+    if (daysGap < 370) {
+      let responsesArr = [];
+      for (let i = 0; i < responses.length; i++) {
+        const answers = responses[i].answer;
+        responsesArr = responsesArr.concat(answers);
+      }
+      const valCountsAndOrder = calcValCountsAndOrder(
+        responsesArr,
+        responses.length
+      );
+      stats.valCountOrdered = valCountsAndOrder[0];
+      stats.valCounts = valCountsAndOrder[1];
+    }
+  }
+
+  // for type = text
+  else if (question.type === 'text') {
+    const valCounts = {};
+    for (let i = 0; i < responses.length; i++) {
+      // const response = String(responses[i].answer);
+      let responseArr = String(responses[i].answer).split(' ');
+      responseArr = responseArr.filter((el) => el.length > 4);
+
+      if (responseArr.length > 40) {
+        responseArr = responseArr.slice(20).concat(responseArr.slice(-20));
+      }
+
+      responseArr.forEach((str) => {
+        if (!valCounts.hasOwnProperty(str)) {
+          valCounts[str] = 1;
+        } else {
+          valCounts[str] += 1;
+        }
+      });
+    }
+    let valCountKeys = Object.keys(valCounts);
+    valCountKeys.sort((a, b) => {
+      return valCounts[a] - valCounts[b];
+    });
+
+    stats.orderValCounts = valCountKeys;
+    stats.valCounts = valCounts;
+  }
+  return stats;
+};
+
+const calcValCountsAndOrder = (responsesArr, responesCount = 0) => {
+  const valCounts = {};
+  for (let i = 0; i < responsesArr.length; i++) {
+    const val = responsesArr[i];
+    if (!valCounts.hasOwnProperty(val)) {
+      valCounts[val] = 1;
+    } else {
+      valCounts[val] += 1;
+    }
+  }
+  let valCountKeys = Object.keys(valCounts);
+
+  valCountKeys.sort((a, b) => {
+    return valCounts[a] - valCounts[b];
+  });
+  return [valCounts, valCountKeys];
+};
+
+// const calcValCountsAndOrder = (responses) => {
+//   const valCounts = {};
+//   for (let i = 0; i < responses.length; i++) {
+//     const val = responses[i].answer;
+//     if (!valCounts.hasOwnProperty(val)) {
+//       valCounts[val] = 1;
+//     } else {
+//       valCounts[val] += 1;
+//     }
+//   }
+
+//   let valCountKeys = Object.keys(valCounts);
+
+//   // console.log(valCountKeys);
+//   valCountKeys.sort((a, b) => {
+//     return valCounts[a] - valCounts[b];
+//   });
+//   // console.log(valCountKeys);
+//   return [valCounts, valCountKeys];
+// };
+
+const orderValCounts = (valCounts) => {
+  let valCountKeys = Object.keys(valCounts);
+  const n = valCountKeys.length;
+
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - i; j++) {
+      const valCountA = valCounts[valCountKeys[j]];
+      const valCountB = valCounts[valCountKeys[j + 1]];
+      if (valCountA > valCountB) {
+        const temp = valCountKeys[j];
+        valCountKeys[j] = valCountKeys[j + 1];
+        valCountKeys[j + 1] = temp;
+      }
+    }
+  }
+
+  return valCountKeys;
 };

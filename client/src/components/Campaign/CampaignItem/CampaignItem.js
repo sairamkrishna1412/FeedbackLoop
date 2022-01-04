@@ -4,9 +4,16 @@ import styles from '../Campaign.module.css';
 
 function CampaignItem(props) {
   const { details } = props;
+  let linkTo = '';
+  if (details.lauchedAt) {
+    linkTo = `/campaign/${details.id}`;
+  } else {
+    linkTo = `/newCampaign/${details.id}`;
+  }
+
   return (
     <Link
-      to={`/campaign/${details.id}`}
+      to={linkTo}
       className={`${styles.campItem} ${styles.campsRow} decor-none`}
     >
       <span>{details.name}</span>

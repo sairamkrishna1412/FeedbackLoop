@@ -12,8 +12,12 @@ const responseSchema = new mongoose.Schema({
     required: [true, 'Provide a valid campaign ID'],
   },
   answer: {
-    type: String,
+    type: [String],
     required: [true, 'Please provide your answer'],
+    validate: {
+      validator: (answer) => answer.length,
+      message: 'Please provide your answer',
+    },
   },
   // feedback: {
   //   type: mongoose.Schema.Types.ObjectId,
