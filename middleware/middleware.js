@@ -1,10 +1,10 @@
-exports.isAuth = (req, res, next) => {
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
+
+exports.isAuth = catchAsync(async (req, res, next) => {
   console.log('ran 1');
   if (req.isAuthenticated()) {
     return next();
   }
-  res.status(400).json({
-    success: false,
-    message: 'You are not logged in. Please log in first!',
-  });
-};
+  return next(new AppError(400, 'You are not logged in. Please log in first!'));
+});
