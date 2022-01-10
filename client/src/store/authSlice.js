@@ -31,14 +31,19 @@ export const authActions = authSlice.actions;
 export const authThunks = {
   getUser: () => {
     return async function (dispatch) {
-      dispatch(uiActions.startLoading());
-      const response = await axios.get('/api/user');
-      if (response.status === 200 && response.data.success) {
-        dispatch(authActions.fetchUser(response.data.data));
-      } else {
+      try {
+        dispatch(uiActions.startLoading());
+        const response = await axios.get('/api/user');
+        if (response.status === 200 && response.data.success) {
+          dispatch(authActions.fetchUser(response.data.data));
+        } else {
+          dispatch(authActions.fetchUser());
+        }
+        dispatch(uiActions.stopLoading());
+      } catch (error) {
+        dispatch(uiActions.stopLoading());
         dispatch(authActions.fetchUser());
       }
-      dispatch(uiActions.stopLoading());
     };
   },
 };

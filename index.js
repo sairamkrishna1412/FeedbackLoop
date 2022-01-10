@@ -52,7 +52,7 @@ app.get('/api/user', (req, res) => {
       data: req.user,
     });
   }
-  res.json({
+  res.status(400).json({
     success: false,
   });
 });

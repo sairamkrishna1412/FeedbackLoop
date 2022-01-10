@@ -17,7 +17,11 @@ const uiSlice = createSlice({
         state.pageLoading = 0;
         state.initLoad = false;
       } else {
-        state.pageLoading -= 1;
+        if (state.pageLoading <= 1) {
+          state.pageLoading = 0;
+        } else {
+          state.pageLoading -= 1;
+        }
       }
     },
   },
