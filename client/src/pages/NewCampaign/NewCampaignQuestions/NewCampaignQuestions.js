@@ -4,7 +4,7 @@ import Authenticate from '../../../components/Auth/Authenticate';
 import Container from '../../../components/UI/Container/Container';
 import Header from '../../../components/UI/Header/Header';
 import PlainCard from '../../../components/UI/Card/PlainCard/PlainCard';
-import QuestionItem from './QuestionItem';
+import QuestionItem from './components/QuestionItem';
 import styles from '../NewCampaign.module.css';
 import { useParams, Redirect } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
