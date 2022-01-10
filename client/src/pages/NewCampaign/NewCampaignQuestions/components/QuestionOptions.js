@@ -1,4 +1,4 @@
-import styles from '../NewCampaign.module.css';
+import styles from '../../NewCampaign.module.css';
 import { useState } from 'react';
 import SwitchToggle from './SwitchToggle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

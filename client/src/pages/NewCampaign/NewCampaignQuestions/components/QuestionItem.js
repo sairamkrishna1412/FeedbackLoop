@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '../NewCampaign.module.css';
+import styles from '../../NewCampaign.module.css';
 import QuestionOptions from './QuestionOptions';
 import Option from './Option';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
