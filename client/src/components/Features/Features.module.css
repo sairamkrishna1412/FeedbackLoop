@@ -9,3 +9,16 @@
   display: flex;
   justify-content: space-around;
 }
+@media screen and (max-width: 480px) 
+{
+  .featureContainer {
+    margin: 0.5rem auto;
+    display: block;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    max-width: 38rem;
+    min-height: 5rem;
+    text-align: left;
+  }
+  
+}
