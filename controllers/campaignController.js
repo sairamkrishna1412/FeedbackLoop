@@ -124,40 +124,9 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     });
   }
 
-  let campaignQuestions = campaign.campaignQuestions;
-
-  const bodyQuestions = body.questions;
-  const noIndexItem = bodyQuestions.find(
-    (el) => el.hasOwnProperty('index') === false
-  );
-  if (noIndexItem) {
-    return next(
-      new AppError(
-        400,
-        `Question: ${noIndexItem.question}, has no order(index). Please make changes`
-      )
-    );
-  }
-
   // create new question doc for each question after successful validation.
-  const orderedBodyQuestions = bodyQuestions.sort((a, b) => a.index - b.index);
-
-  const improperIndexItem = orderedBodyQuestions.find((el, index) => {
-    if (el.index !== index) {
-      return true;
-    }
-  });
-
-  if (improperIndexItem) {
-    return next(
-      new AppError(
-        400,
-        `Question: ${improperIndexItem.question}, has improper order(index). please make changes`
-      )
-    );
-  }
-
-  for (const question of orderedBodyQuestions) {
+  let campaignQuestions = campaign.campaignQuestions;
+  for (const question of body.questions) {
     const feedbackType = question.type;
     const hasChoices =
       feedbackType === 'checkbox' ||

@@ -16,14 +16,12 @@
   font-weight: 600;
   text-align: center;
 }
-
-@media only screen and (max-width: 950px) {
-  .summaryHeading {
-    font-size: 2rem;
-  }
-
-  .summaryVal {
-    font-size: 2.2rem;
+ @media screen and (min-device-width: 480px) and (max-device-width: 1024px)
+ {
+  body {
+    
+    padding: 2px;
+    font-size: 4.5px;
+    text-align: center;
   }
 }
-
