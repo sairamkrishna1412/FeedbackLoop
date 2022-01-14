@@ -142,3 +142,9 @@
 .pointer {
   cursor: pointer;
 }
+
+@media only screen and (max-width: 1024px) {
+  .container {
+    width: 85%;
+  }
+}

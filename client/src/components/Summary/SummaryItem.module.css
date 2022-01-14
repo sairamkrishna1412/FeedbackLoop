@@ -15,3 +15,13 @@
   font-weight: 600;
   text-align: center;
 }
+
+@media only screen and (max-width: 950px) {
+  .summaryHeading {
+    font-size: 2rem;
+  }
+
+  .summaryVal {
+    font-size: 2.2rem;
+  }
+}
