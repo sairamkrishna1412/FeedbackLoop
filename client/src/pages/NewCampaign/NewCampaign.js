@@ -11,9 +11,7 @@ import NewCampaignNavigate from './NewCampaignNavigate';
 
 const NewCampaign = (props) => {
   const { path } = useRouteMatch();
-  // const { pathname } = useLocation();
-  // console.log('path', path);
-  // console.log('pathname', pathname);
+  // console.log(path);
   return (
     <Switch>
       <Route path={path} exact>
@@ -24,9 +22,6 @@ const NewCampaign = (props) => {
       </Route>
 
       {/* yet to be implemented */}
-      <Route path={`${path}/:id/base`}>
-        <NewCampaignBase></NewCampaignBase>
-      </Route>
       <Route path={`${path}/:id/questions`}>
         <NewCampaignQuestions></NewCampaignQuestions>
       </Route>
