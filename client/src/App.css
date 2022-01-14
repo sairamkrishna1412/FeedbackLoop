@@ -32,8 +32,9 @@
 }
 
 .logo {
-  font-size: 2.9rem;
+  font-size: 2.2rem;
   font-weight: 300;
+  
 }
 
 .App-link {
@@ -141,4 +142,18 @@
 
 .pointer {
   cursor: pointer;
+}
+@media screen and  (max-width: 1024px)
+{
+  .container
+  {
+    width:80%;
+  }
+}
+@media screen and (max-width: 480px) 
+{
+   .logo{
+     font-size: 2.4rem;
+     font-weight: 300;
+   }
 }

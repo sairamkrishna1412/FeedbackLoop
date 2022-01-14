@@ -6,6 +6,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  
 }
 
 .homeIntro {
@@ -38,3 +39,30 @@
 .arrow {
   margin: auto 2rem;
 }
+@media screen and  (max-device-width: 480px)
+{
+ .home_container 
+  {
+    width: 100%;
+    height: 75vh;
+    padding: 0.5rem 2rem;
+  }
+  .homeIntro h1
+  {
+    font-size: 3.5rem;
+    
+   font-weight: normal;
+   margin-bottom: 2.5rem;
+    color: #080808;
+  }  
+  .linkButton {
+    margin: auto 1rem;
+    padding: 1.2rem 3rem;
+  }
+  .homeIntro p {
+    font-size: 2rem;
+    color: #444;
+    padding-top: 8px;
+  }
+}
+
