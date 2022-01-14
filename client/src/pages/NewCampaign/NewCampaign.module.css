@@ -73,13 +73,12 @@ form textarea {
 
 .form-wrapper label {
   font-size: 2.2rem;
-  padding-bottom: 15px;
 }
 
 .form-control {
   border: 2px solid #b6cdfe;
-  width: 120%;
-  max-width: 120%;
+  width: 70%;
+  max-width: 70%;
   height: 40px;
   padding: 0 20px;
   border-radius: 10px;
@@ -134,8 +133,8 @@ form textarea {
 }
 
 .separator {
-  margin: 6rem auto;
-  width: 100%;
+  margin: 7rem auto;
+  width: 90%;
   height: 2px;
   border-radius: 10px;
   background-color: #7e7e7e;
@@ -150,32 +149,26 @@ form textarea {
 
 .question-opts__block {
   margin-top: 4rem;
-  display: inline;
-
-  /*justify-content: space-between;*/
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
 .opt-item {
-  /* width: 30%; */ 
+  /* width: 30%; */
   display: flex;
   /* justify-content: space-between; */
   align-items: center;
-  gap: 5px;
-  
-  
+  gap: 10px;
 }
 
 .opt-item:last-of-type {
   cursor: pointer;
-  align: center;
-  
-
 }
 
 .opt-label {
   font-size: 2rem;
-  margin-right: 3rem;
+  margin-right: 2rem;
 }
 
 .option-box {
