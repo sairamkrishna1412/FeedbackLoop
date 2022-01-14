@@ -62,45 +62,53 @@ const NewCampaignBase = (props) => {
         </div>
         <PlainCard>
           <form onSubmit={formSubmitHandler}>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="campaignName">Campaign Name</label>
               <input
                 type="text"
                 name="campaignName"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.campaignName}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="emailSubject">Email Subject</label>
               <input
                 type="text"
                 name="emailSubject"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.emailSubject}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="previewText">Preview text</label>
               <input
                 type="text"
                 name="previewText"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.previewText}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="emailContent">Email Content</label>
               <textarea
                 type="text"
                 name="emailContent"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.emailContent}
               />

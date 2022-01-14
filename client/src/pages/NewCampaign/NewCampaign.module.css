@@ -162,7 +162,7 @@ form textarea {
 .opt-item {
   /* width: 30%; */
   display: flex;
-  /* justify-content: space-between; */
+  justify-content: center;
   align-items: center;
   gap: 10px;
 }
@@ -206,27 +206,16 @@ form textarea {
 }
 
 @media only screen and (max-width: 1550px) {
-  .form-wrapper label {
+  .form-wrapper--break label {
     padding-bottom: 15px;
   }
-  .form-control {
+
+  .form-control--break {
     width: 120%;
     max-width: 120%;
   }
   .separator {
     margin: 6rem auto;
     width: 100%;
-  }
-  .question-opts__block {
-    display: inline;
-  }
-  .opt-item {
-    gap: 5px;
-  }
-  .opt-item:last-of-type {
-    align: center;
-  }
-  .opt-label {
-    margin-right: 3rem;
   }
 }
