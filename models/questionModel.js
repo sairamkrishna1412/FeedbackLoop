@@ -33,6 +33,10 @@ const questionSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  index: {
+    type: Number,
+    required: [true, 'Please provide the index of the question'],
+  },
 });
 
 // questionSchema.pre('save', function (next) {
