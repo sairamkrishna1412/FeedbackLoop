@@ -14,6 +14,7 @@ import Signup from './pages/Singup/Singup';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CampaignSummary from './pages/CampaignSummary/CampaignSummary';
 import NewCampaign from './pages/NewCampaign/NewCampaign';
+import Authenticate from './components/Auth/Authenticate';
 
 import './App.css';
 
@@ -33,13 +34,17 @@ function App() {
     <Fragment>
       <Switch>
         <Route path="/" exact>
-          <Dashboard></Dashboard>
+          <Authenticate>
+            <Dashboard></Dashboard>
+          </Authenticate>
         </Route>
         <Route path="/home" exact>
           <Home></Home>
         </Route>
         <Route path="/newCampaign">
-          <NewCampaign></NewCampaign>
+          <Authenticate>
+            <NewCampaign></NewCampaign>
+          </Authenticate>
         </Route>
         <Route path="/campaign/:id">
           <CampaignSummary></CampaignSummary>

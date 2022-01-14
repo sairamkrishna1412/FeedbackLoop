@@ -103,6 +103,7 @@ form textarea {
   outline: none;
   margin-right: 2rem;
   width: 50%;
+  transition: all 0.3s;
 }
 
 .form-wrapper textarea {
@@ -133,6 +134,10 @@ form textarea {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+.form-control--option:focus {
+  border-bottom: 2px solid #739ffe;
+}
+
 .separator {
   margin: 6rem auto;
   width: 100%;
@@ -159,7 +164,7 @@ form textarea {
 .opt-item {
   /* width: 30%; */ 
   display: flex;
-  /* justify-content: space-between; */
+  justify-content: center;
   align-items: center;
   gap: 5px;
   
@@ -186,6 +191,11 @@ form textarea {
   font-size: 1.5rem;
   margin-left: 0.5rem;
   color: #739ffe;
+  transition: all 0.2s;
+}
+
+.add-option:hover {
+  color: #407cfd;
 }
 
 .add-question {
@@ -200,4 +210,19 @@ form textarea {
 .question-subhead {
   font-size: 2.2rem;
   margin-top: 4rem;
+}
+
+@media only screen and (max-width: 1550px) {
+  .form-wrapper--break label {
+    padding-bottom: 15px;
+  }
+
+  .form-control--break {
+    width: 120%;
+    max-width: 120%;
+  }
+  .separator {
+    margin: 6rem auto;
+    width: 100%;
+  }
 }

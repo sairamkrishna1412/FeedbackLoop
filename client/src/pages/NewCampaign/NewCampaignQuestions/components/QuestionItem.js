@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from '../../NewCampaign.module.css';
 import QuestionOptions from './QuestionOptions';
-import Option from './Option';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import Options from './Options';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
 const QuestionItem = (props) => {
   // const [type, setType] = useState('number');
-  const { values } = props;
+  let { values } = props;
+  // values = JSON.parse(JSON.stringify(values));
+  // console.log(values);
   // const vals = {};
   // const values = Object.assign(vals, props.values);
   // const values = { ...props.values };
@@ -22,32 +24,51 @@ const QuestionItem = (props) => {
   };
 
   const choicesChangeHandler = (e) => {
-    // const newChoices = values.choices;
+    const newChoices = [...values.choices];
     const value = e.target.value;
 
     if (values.type === 'number') {
       if (e.target.name.includes('min')) {
-        values.choices[0] = value;
+        newChoices[0] = value;
       } else {
-        values.choices[1] = value;
+        newChoices[1] = value;
       }
     } else if (values.type === 'text') {
-      values.choices[0] = value;
-    } else if (values.type === 'checkbox' || values.type === 'radio') {
-      values.choices.push(value);
-    } else if (values.type === 'range') {
+      newChoices[0] = value;
+    }
+    //optionsChangeHandler function for checkbox and radio
+    // else if (values.type === 'checkbox' || values.type === 'radio') {
+    //   newChoices.push(value);
+    // }
+    else if (values.type === 'range') {
       const target = e.target.name;
       if (target.includes('min')) {
-        values.choices[0] = value;
+        newChoices[0] = value;
       } else if (target.includes('max')) {
-        values.choices[1] = value;
+        newChoices[1] = value;
       } else {
-        values.choices[2] = value;
+        newChoices[2] = value;
       }
     } else if (values.type === 'url') {
-      values.choices[0] = value;
+      newChoices[0] = value;
+    } else if (values.type === 'date') {
+      const target = e.target.name;
+      if (target.includes('min')) {
+        newChoices[0] = value;
+      } else if (target.includes('max')) {
+        newChoices[1] = value;
+      }
     }
-    props.onQuestionChange({ ...values });
+    props.onQuestionChange({ ...values, choices: newChoices });
+  };
+
+  //only for checkbox and radio
+  const optionsChangeHandler = (newChoices) => {
+    // console.log('called');
+    // const newOptions = [...values.choices];
+    // values.choices = choices;
+    // console.log('changed ', values.choices);
+    props.onQuestionChange({ ...values, choices: newChoices });
   };
 
   const requiredChangeHandler = (e) => {
@@ -82,6 +103,7 @@ const QuestionItem = (props) => {
             type="number"
             onChange={choicesChangeHandler}
             value={values.choices[0] || ''}
+            max={values.choices[1] || ''}
           />
           <label htmlFor="max">Max</label>
           <input
@@ -90,6 +112,7 @@ const QuestionItem = (props) => {
             type="number"
             onChange={choicesChangeHandler}
             value={values.choices[1] || ''}
+            min={values.choices[0] || ''}
           />
         </div>
       );
@@ -108,13 +131,10 @@ const QuestionItem = (props) => {
       );
     } else if (values.type === 'checkbox' || values.type === 'radio') {
       content = (
-        <React.Fragment>
-          <h3 className={styles['question-subhead']}>Options</h3>
-          <Option></Option>
-          <div className="pointer">
-            <span className={styles['add-option']}>Add Option</span>
-          </div>
-        </React.Fragment>
+        <Options
+          options={values.choices}
+          onOptionsChange={optionsChangeHandler}
+        ></Options>
       );
     } else if (values.type === 'range') {
       content = (
@@ -126,6 +146,7 @@ const QuestionItem = (props) => {
             type="number"
             onChange={choicesChangeHandler}
             value={values.choices[0] || ''}
+            max={values.choices[1] || ''}
           />
           <label htmlFor="max">Max</label>
           <input
@@ -134,6 +155,7 @@ const QuestionItem = (props) => {
             type="number"
             onChange={choicesChangeHandler}
             value={values.choices[1] || ''}
+            min={values.choices[0] || ''}
           />
           <label htmlFor="step">Step</label>
           <input
@@ -142,6 +164,7 @@ const QuestionItem = (props) => {
             type="number"
             onChange={choicesChangeHandler}
             value={values.choices[2] || ''}
+            max={values.choices[1] || ''}
           />
         </div>
       );
@@ -155,6 +178,31 @@ const QuestionItem = (props) => {
             type="text"
             onChange={choicesChangeHandler}
             value={values.choices[0] || ''}
+          />
+        </div>
+      );
+    }
+    // for date
+    else {
+      content = (
+        <div className={styles['form-wrapper']}>
+          <label htmlFor="min">Min</label>
+          <input
+            className={`${styles['form-control']} ${styles['form-control--small']}`}
+            name="min"
+            type="date"
+            onChange={choicesChangeHandler}
+            value={values.choices[0] || ''}
+            max={values.choices[1] || ''}
+          />
+          <label htmlFor="max">Max</label>
+          <input
+            className={`${styles['form-control']} ${styles['form-control--small']}`}
+            name="max"
+            type="date"
+            onChange={choicesChangeHandler}
+            value={values.choices[1] || ''}
+            min={values.choices[0] || ''}
           />
         </div>
       );
