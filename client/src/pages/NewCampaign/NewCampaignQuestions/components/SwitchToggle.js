@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styles from './SwitchToggle.module.css';
 
 const SwitchToggle = (props) => {
