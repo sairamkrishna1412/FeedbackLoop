@@ -1,33 +1,21 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import Authenticate from '../../../components/Auth/Authenticate';
 import Container from '../../../components/UI/Container/Container';
 import Header from '../../../components/UI/Header/Header';
 import PlainCard from '../../../components/UI/Card/PlainCard/PlainCard';
 import QuestionItem from './components/QuestionItem';
+import CampaignSteps from '../CampaignSteps/CampaignSteps';
+import ScrollToTop from '../../../components/UI/ScrollToTop';
 import styles from '../NewCampaign.module.css';
 import { useParams, Redirect } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
-
-let firstLoad = true;
 
 const NewCampaignQuestions = (props) => {
   const { id } = useParams();
   const campaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
-  const [questions, setQuestions] = useState([]);
-  // console.log(questions);
-  if (!campaign) {
-    return <Redirect to="/"></Redirect>;
-  }
-  const campaignQuestions = campaign.campaignQuestions;
-
-  if (firstLoad && campaignQuestions.length) {
-    firstLoad = false;
-    setQuestions(campaignQuestions);
-  }
 
   let newQuestion = {
     question: '',
@@ -36,8 +24,24 @@ const NewCampaignQuestions = (props) => {
     required: false,
     index: 0,
   };
-  if (!questions.length) {
-    setQuestions([newQuestion]);
+
+  let campaignQuestions;
+
+  if (
+    campaign.hasOwnProperty('campaignQuestions') &&
+    campaign.campaignQuestions.length
+  ) {
+    campaignQuestions = campaign.campaignQuestions;
+  }
+
+  if (!campaignQuestions) {
+    campaignQuestions = [newQuestion];
+  }
+
+  const [questions, setQuestions] = useState(campaignQuestions);
+
+  if (!campaign) {
+    return <Redirect to="/"></Redirect>;
   }
 
   const addQuestion = (e) => {
@@ -60,7 +64,8 @@ const NewCampaignQuestions = (props) => {
   };
 
   const changeOrder = (curInd, desInd) => {
-    const newQuestions = [...questions];
+    // const newQuestions = [...questions];
+    const newQuestions = JSON.parse(JSON.stringify(questions));
     const movingQuestion = newQuestions[curInd];
     const n = newQuestions.length;
     if (desInd > n - 1) {
@@ -97,7 +102,7 @@ const NewCampaignQuestions = (props) => {
     }
     setQuestions(newQuestions);
   };
-
+  console.log(questions);
   const questionArr = questions.map((question, index) => {
     return (
       <QuestionItem
@@ -111,7 +116,8 @@ const NewCampaignQuestions = (props) => {
   });
 
   return (
-    <Authenticate className="container">
+    <div className="container">
+      <ScrollToTop />
       <Header></Header>
       <h2 className={`subHeading`}>
         {campaign.campaignName !== '' ? campaign.campaignName : 'New Campaign'}
@@ -122,6 +128,7 @@ const NewCampaignQuestions = (props) => {
         </div>
         <PlainCard>
           <form>
+            {/* {console.log('this ran', questionArr)} */}
             {questionArr}
             <div className={styles['add-question']}>
               <FontAwesomeIcon
@@ -183,22 +190,9 @@ const NewCampaignQuestions = (props) => {
             />
           </form> */}
         </PlainCard>
-        <div
-          className={`${styles['number-box']} ${styles['number-box--bottom']}`}
-        >
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            1
-          </div>
-          <div className={`${styles['number']} ${styles['number-big']}`}>2</div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            3
-          </div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            4
-          </div>
-        </div>
+        <CampaignSteps></CampaignSteps>
       </Container>
-    </Authenticate>
+    </div>
   );
 };
 

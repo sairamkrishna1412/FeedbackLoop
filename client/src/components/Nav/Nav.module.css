@@ -1,12 +1,18 @@
 nav ul {
   list-style: none;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .navLeft li {
   margin-right: 7rem;
+  white-space: nowrap;
 }
+
+.navLeft li:last-child {
+  margin-right: 0rem;
+}
+
 .navLink {
   font-size: 1.5rem;
   font-weight: 400;

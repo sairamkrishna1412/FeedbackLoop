@@ -1,11 +1,12 @@
-import { useState } from 'react';
-// import { Redirect } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { userThunks } from '../../../store/userSlice';
-import Authenticate from '../../../components/Auth/Authenticate';
 import Container from '../../../components/UI/Container/Container';
 import Header from '../../../components/UI/Header/Header';
 import PlainCard from '../../../components/UI/Card/PlainCard/PlainCard';
+import CampaignSteps from '../CampaignSteps/CampaignSteps';
+import ScrollToTop from '../../../components/UI/ScrollToTop';
 
 import styles from '../NewCampaign.module.css';
 
@@ -17,7 +18,16 @@ const NewCampaignBase = (props) => {
     previewText: '',
     emailContent: '',
   };
-  const [campaign, setCampaign] = useState(newCampaignObj);
+  const { id } = useParams();
+  let reqCampaign = useSelector((state) =>
+    state.user.campaigns.find((el) => el._id === id)
+  );
+
+  if (!reqCampaign) {
+    reqCampaign = newCampaignObj;
+  }
+
+  const [campaign, setCampaign] = useState(reqCampaign);
 
   const inputChangeHandler = (e) => {
     setCampaign((state) => {
@@ -40,7 +50,8 @@ const NewCampaignBase = (props) => {
   };
 
   return (
-    <Authenticate className="container">
+    <div className="container">
+      <ScrollToTop />
       <Header></Header>
       <h2 className={`subHeading`}>
         {campaign.campaignName !== '' ? campaign.campaignName : 'New Campaign'}
@@ -51,45 +62,53 @@ const NewCampaignBase = (props) => {
         </div>
         <PlainCard>
           <form onSubmit={formSubmitHandler}>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="campaignName">Campaign Name</label>
               <input
                 type="text"
                 name="campaignName"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.campaignName}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="emailSubject">Email Subject</label>
               <input
                 type="text"
                 name="emailSubject"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.emailSubject}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="previewText">Preview text</label>
               <input
                 type="text"
                 name="previewText"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.previewText}
               />
             </div>
             <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
+            <div
+              className={`${styles['form-wrapper']} ${styles['form-wrapper--break']}`}
+            >
               <label htmlFor="emailContent">Email Content</label>
               <textarea
                 type="text"
                 name="emailContent"
-                className={`${styles['form-control']}`}
+                className={`${styles['form-control']} ${styles['form-control--break']}`}
                 onChange={inputChangeHandler}
                 value={campaign.emailContent}
               />
@@ -102,22 +121,9 @@ const NewCampaignBase = (props) => {
             />
           </form>
         </PlainCard>
-        <div
-          className={`${styles['number-box']} ${styles['number-box--bottom']}`}
-        >
-          <div className={`${styles['number']} ${styles['number-big']}`}>1</div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            2
-          </div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            3
-          </div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            4
-          </div>
-        </div>
+        <CampaignSteps></CampaignSteps>
       </Container>
-    </Authenticate>
+    </div>
   );
 };
 

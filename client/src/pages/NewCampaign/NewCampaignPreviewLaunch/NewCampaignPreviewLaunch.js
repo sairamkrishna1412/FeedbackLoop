@@ -1,9 +1,10 @@
 import { React } from 'react';
 import { useSelector } from 'react-redux';
-import Authenticate from '../../../components/Auth/Authenticate';
 import Container from '../../../components/UI/Container/Container';
 import Header from '../../../components/UI/Header/Header';
 import PlainCard from '../../../components/UI/Card/PlainCard/PlainCard';
+import CampaignSteps from '../CampaignSteps/CampaignSteps';
+import ScrollToTop from '../../../components/UI/ScrollToTop';
 import styles from '../NewCampaign.module.css';
 import { useParams, Redirect } from 'react-router';
 
@@ -16,7 +17,8 @@ const NewCampaignPreviewLaunch = (props) => {
     return <Redirect to="/"></Redirect>;
   }
   return (
-    <Authenticate className="container">
+    <div className="container">
+      <ScrollToTop />
       <Header></Header>
       <h2 className={`subHeading`}>
         {campaign.campaignName !== '' ? campaign.campaignName : 'New Campaign'}
@@ -26,22 +28,9 @@ const NewCampaignPreviewLaunch = (props) => {
           <div className={`${styles['number']} ${styles['number-big']}`}>4</div>
         </div>
         <PlainCard></PlainCard>
-        <div
-          className={`${styles['number-box']} ${styles['number-box--bottom']}`}
-        >
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            1
-          </div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            2
-          </div>
-          <div className={`${styles['number']} ${styles['number-small']}`}>
-            3
-          </div>
-          <div className={`${styles['number']} ${styles['number-big']}`}>4</div>
-        </div>
+        <CampaignSteps></CampaignSteps>
       </Container>
-    </Authenticate>
+    </div>
   );
 };
 
