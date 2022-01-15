@@ -11,3 +11,8 @@
 .cardInner {
   padding: 7rem 10rem;
 }
+@media screen and (max-width: 1024px) {
+  .cardInner {
+    padding: 7rem 8rem;
+  }
+}

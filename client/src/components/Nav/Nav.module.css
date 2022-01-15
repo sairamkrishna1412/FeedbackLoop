@@ -41,8 +41,9 @@ nav ul {
   display: flex;
   flex-direction: column;
   background-color: white;
-  min-width: 20rem;
+  min-width: 18rem;
   border-radius: 5px;
+  border-styles: outset;
   padding: 3rem 2rem;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
