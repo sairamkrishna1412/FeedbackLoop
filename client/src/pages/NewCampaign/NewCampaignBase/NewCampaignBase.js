@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { userThunks } from '../../../store/userSlice';
 import Container from '../../../components/UI/Container/Container';
@@ -12,6 +12,7 @@ import styles from '../NewCampaign.module.css';
 
 const NewCampaignBase = (props) => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const newCampaignObj = {
     campaignName: '',
     emailSubject: '',
@@ -19,16 +20,29 @@ const NewCampaignBase = (props) => {
     emailContent: '',
   };
   const { id } = useParams();
+
   let reqCampaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
+  const newCampaign = useSelector((state) => state.user.newCampaign);
+
+  useEffect(() => {
+    if (newCampaign.hasOwnProperty('_id')) {
+      dispatch(userThunks.resetNewCampaign());
+      history.push(`/newCampaign/${newCampaign._id}/questions`);
+    }
+  }, [newCampaign, history, dispatch]);
 
   if (!reqCampaign) {
-    reqCampaign = newCampaignObj;
+    if (!id) {
+      reqCampaign = newCampaign;
+    } else {
+      reqCampaign = newCampaignObj;
+    }
   }
 
   const [campaign, setCampaign] = useState(reqCampaign);
-
+  // console.log(campaign);
   const inputChangeHandler = (e) => {
     setCampaign((state) => {
       return { ...state, [e.target.name]: e.target.value };
@@ -37,16 +51,45 @@ const NewCampaignBase = (props) => {
 
   const formSubmitHandler = (e) => {
     e.preventDefault();
-    const campKeys = Object.keys(campaign);
-    for (let i = 0; i < campKeys.length; i++) {
-      const key = campKeys[i];
+    // const campKeys = Object.keys(campaign);
+    const checkFields = ['campaignName', 'emailSubject', 'emailContent'];
+
+    for (let i = 0; i < checkFields.length; i++) {
+      const key = checkFields[i];
       if (campaign[key] === '') {
         return alert(`${key.toLowerCase()} is empty. please fill all fields`);
       }
     }
     // console.log(campaign);
     dispatch(userThunks.newCampaignSetup(campaign));
-    setCampaign(newCampaignObj);
+    //   .then((res, err) => {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     console.log('after dispatch new camapign setup');
+    //     // for existing campaign
+    //     // if campaign already has id field then simply redirect to /campaign/id/questions
+    //     if (id) {
+    //       history.push(`/newCampaign/${id}/questions`);
+    //     }
+    //     // else {
+    //     //   console.log('new campaign checking _id', newCampaign);
+    //     //   if (newCampaign.hasOwnProperty('_id')) {
+    //     //     console.log('new campaign redirecting');
+    //     //     history.push(`/newCampaign/${newCampaign._id}/questions`);
+    //     //   }
+    //     //   // setCampaign(newCampaign);
+    //     // }
+    //   }
+    // });
+
+    if (id) {
+      history.push(`/newCampaign/${id}/questions`);
+    }
+    // for new campaign
+    // use selector and retrive newCampaign from state. if newCampaign is not empty, then take "id" from newCampaign and redirect to /campaign/"id"/questions
+
+    // redirect using history
   };
 
   return (
@@ -117,7 +160,7 @@ const NewCampaignBase = (props) => {
             <input
               type="submit"
               value="Save & Next"
-              className={`btn btn-black ${styles['btn-right']}`}
+              className={`btn btn__black ${styles['btn-right']}`}
             />
           </form>
         </PlainCard>

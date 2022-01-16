@@ -112,8 +112,8 @@
   /* animation: linkcolor 0.5s linear 0.1s infinite normal; */
 }
 
-.btn--black {
-  background: #000000;
+.btn__black {
+  background: #191919;
   color: #fff;
 }
 
