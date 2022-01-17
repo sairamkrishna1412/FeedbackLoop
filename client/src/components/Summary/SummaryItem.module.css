@@ -3,16 +3,15 @@
   height: 150px;
   background-color: #739ffe;
   border-radius: 10px;
-  border-style: outset;
 }
 .summaryHeading {
-  font-size: 20px;
+  font-size: 2.5rem;
   font-weight: 300;
   text-align: center;
 }
 
 .summaryVal {
-  font-size: 30px;
+  font-size: 2.8rem;
   font-weight: 600;
   text-align: center;
 }
@@ -29,5 +28,15 @@
     font-size: 15px;
     font-weight: 200;
     text-align: center;
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  .summaryHeading {
+    font-size: 2rem;
+  }
+
+  .summaryVal {
+    font-size: 2.2rem;
   }
 }

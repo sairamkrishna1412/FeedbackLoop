@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import styles from './Dashboard.module.css';
-import Authenticate from '../../components/Auth/Authenticate';
 
 function Dashboard() {
   const userState = useSelector((state) => state.user);
@@ -18,7 +17,7 @@ function Dashboard() {
   const lauchedCamps = userState.campaigns.filter((el) => el.lauchedAt);
   const unLauchedCamps = userState.campaigns.filter((el) => !el.lauchedAt);
   return (
-    <Authenticate>
+    <React.Fragment>
       <div className={`container`}>
         <Header></Header>
         {/* <h2 className={styles.heading}>Dashboard</h2> */}
@@ -54,14 +53,14 @@ function Dashboard() {
         ></CampaignCont>
         <CampaignCont
           className={styles.newBlock}
-          heading="UnLaunched Campaigns"
+          heading="Unlaunched Campaigns"
           items={unLauchedCamps}
         ></CampaignCont>
       </div>
       <div className={styles.newCampaignBtn}>
         <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
       </div>
-    </Authenticate>
+    </React.Fragment>
   );
 }
 
