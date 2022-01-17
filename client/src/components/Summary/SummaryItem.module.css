@@ -16,12 +16,18 @@
   font-weight: 600;
   text-align: center;
 }
- @media screen and (min-device-width: 480px) and (max-device-width: 1024px)
+ @media screen and (min-device-width: 480px) 
  {
-  body {
-    
-    padding: 2px;
-    font-size: 4.5px;
+  .quickSummaryItem {
+    width: 35%;
+    height: 130px;
+    background-color: #739ffe;
+    border-radius: 10px;
+    border-style: outset;
+  }
+  .summaryHeading {
+    font-size: 15px;
+    font-weight: 200;
     text-align: center;
   }
 }
