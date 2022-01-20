@@ -18,7 +18,7 @@ function CampaignSummary() {
   // console.log(campaign);
 
   useEffect(() => {
-    dispatch(userThunks.getCampaign(id));
+    dispatch(userThunks.getCampaignSummary(id));
   }, [dispatch, id]);
   // const campaign = useSelector((state) =>
   //   state.user.campaigns.find((el) => el._id === id)

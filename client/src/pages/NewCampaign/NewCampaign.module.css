@@ -114,12 +114,12 @@ form textarea {
   color: #444;
   font-size: 1.6rem;
   background-color: #d8e4ff;
-  
+  /* font-size: 1rem; */
 }
 
 .form-control optgroup {
   background-color: #d8e4ff;
-  
+  /* font-size: 1rem; */
 }
 
 .btn-right {
@@ -207,6 +207,10 @@ form textarea {
   margin-top: 4rem;
 }
 
+.form-control__emails {
+  line-height: 1.8;
+}
+
 @media only screen and (max-width: 1550px) {
   .form-wrapper--break label {
     padding-bottom: 15px;
@@ -221,26 +225,23 @@ form textarea {
     width: 100%;
   }
 }
-@media only screen and (max-width: 480px) 
-{
-  .form-wrapper label{
+@media only screen and (max-width: 480px) {
+  .form-wrapper label {
     padding-bottom: 6px;
   }
-  .form-control
-   {
+  .form-control {
     width: 97%;
-     max-width: 101%;
-     }
-     
-     .container-wrapper{
-       width: 95%;
-     }
-     .question-opts__block {
-       display:inline-block;
-     }
-     .opt-item {
-       justify-content: space-between;
-       margin-top: 2rem;
-     }
+    max-width: 101%;
+  }
 
+  .container-wrapper {
+    width: 95%;
+  }
+  .question-opts__block {
+    display: inline-block;
+  }
+  .opt-item {
+    justify-content: space-between;
+    margin-top: 2rem;
+  }
 }

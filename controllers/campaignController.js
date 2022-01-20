@@ -25,36 +25,38 @@ exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
 exports.newCampaign = catchAsync(async (req, res, next) => {
   const user = req.user;
   req.body.user = user.id;
+  let doc;
   // check users existing campaigns and see if campaign name is unique to user acc.
   const userCampaings = await Campaign.find({ id: user.id });
 
-  const campaignExists = userCampaings.find(
-    (camp) => camp.campaignName == req.body.campaignName
-  );
-  if (campaignExists) {
-    return next(
-      new AppError(
-        400,
-        'Campaign with that name already exists. Please change the campaign name'
-      )
+  //this check is for updating campaign base
+  if (req.body.hasOwnProperty('_id')) {
+    const existingInd = userCampaings.findIndex(
+      (camp) => String(camp._id) === req.body._id
     );
-    // return res.json({
-    //   success: false,
-    //   message:
-    //     'Campaign with that name already exists. Please change the campaign name',
-    // });
+    if (existingInd === -1) {
+      return next(new AppError(400, 'No campaign with that id found!'));
+    }
+    doc = await Campaign.findByIdAndUpdate(req.body._id, req.body, {
+      new: true,
+    }).populate('campaignQuestions');
   }
-  // userCampaings.forEach((camp) => {
-  //   if (req.body.campaignName === camp.campaignName) {
-  //     return res.json({
-  //       success: false,
-  //       message:
-  //         'Campaign with that name already exists. Please change the campaign name',
-  //     });
-  //   }
-  // });
-
-  const doc = await Campaign.create(req.body);
+  // this is for creating new campapign
+  else {
+    const existingCampaignWithSameName = userCampaings.findIndex(
+      (camp) => camp.campaignName == req.body.campaignName
+    );
+    if (existingCampaignWithSameName !== -1) {
+      // console.log('this is existing campaign', existingCampaign);
+      return next(
+        new AppError(
+          400,
+          'Campaign with that name already exists. Please change the campaign name'
+        )
+      );
+    }
+    doc = await Campaign.create(req.body);
+  }
 
   return res.status(201).json({
     success: true,
@@ -62,9 +64,69 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
   });
 });
 
+checkCampaignOwnerWithID = async (campaign_id, user_id) => {
+  try {
+    const campaign = await Campaign.findById(campaign_id)
+      .populate('campaignQuestions')
+      .lean();
+
+    // console.log(campaign);
+    if (!campaign || String(campaign.user) !== user_id) {
+      throw new AppError(400, 'There is no such campaign in your campaigns');
+    }
+    return campaign;
+  } catch (error) {
+    throw error;
+  }
+};
+
 exports.campaignEmails = catchAsync(async (req, res, next) => {
   //check emails
   const { campaign_id: campaign } = req.body;
+  const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
+
+  await CampaignEmail.deleteMany({ campaign });
+
+  const dbEmails = [];
+
+  req.body.campaignEmails.forEach((email) => {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: `${email} is not an email. please make changes.`,
+      });
+    }
+    dbEmails.push({ campaign, email, sent: false });
+  });
+
+  if (!dbEmails.length) {
+    return res.status(400).json({
+      success: false,
+      message: 'Emails already exist in campaign',
+    });
+  }
+
+  // total valid emails
+  const recipientCount = dbEmails.length;
+  //insert emails
+  const docs = await CampaignEmail.insertMany(dbEmails);
+  curCampaign.campaignEmails = docs;
+  //update campaign recipients property
+  await Campaign.findByIdAndUpdate(campaign, { recipientCount });
+
+  res.status(200).json({
+    success: true,
+    results: docs.length,
+    data: docs,
+    campaign: curCampaign,
+  });
+});
+
+exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
+  //check emails
+  const { campaign_id: campaign } = req.body;
+  const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
+
   const existingEmails = await CampaignEmail.find({ campaign }).select('email');
 
   const emailsArr = existingEmails.map((el) => el.email);
@@ -96,13 +158,6 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
   const docs = await CampaignEmail.insertMany(dbEmails);
   //update campaign recipients property
   await Campaign.findByIdAndUpdate(campaign, { recipientCount });
-  // // check credits are available
-  // if (user.credits < req.body.campaignEmails.length) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: `You don't have enough credits. please buy more credits.`,
-  //   });
-  // }
 
   res.status(200).json({
     success: true,
@@ -124,7 +179,17 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     });
   }
 
+  if (campaign.lauchedAt || campaign.respondedRecipientCount > 0) {
+    return next(
+      new AppError(
+        400,
+        `This campaign is already launched. we cannot make changes now.`
+      )
+    );
+  }
+
   let campaignQuestions = campaign.campaignQuestions;
+  const shouldBeDeletedQuestions = [...campaignQuestions];
 
   const bodyQuestions = body.questions;
   const noIndexItem = bodyQuestions.find(
@@ -141,7 +206,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
 
   // create new question doc for each question after successful validation.
   const orderedBodyQuestions = bodyQuestions.sort((a, b) => a.index - b.index);
-
+  // console.log(orderedBodyQuestions);
   const improperIndexItem = orderedBodyQuestions.find((el, index) => {
     if (el.index !== index) {
       return true;
@@ -200,55 +265,48 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     }
 
     //save question and add choice id to campaignQuestions array;
-    const questionDoc = await Question.create({
-      ...question,
-    });
-    campaignQuestions.push(String(questionDoc.id));
+    if (question.hasOwnProperty('_id')) {
+      const existingQuestionInd = shouldBeDeletedQuestions.findIndex(
+        (el) => String(el._id) === question._id
+      );
+      if (existingQuestionInd !== -1) {
+        const updateId = shouldBeDeletedQuestions[existingQuestionInd]._id;
+        await Question.findByIdAndUpdate(updateId, { ...question });
+        shouldBeDeletedQuestions.splice(existingQuestionInd, 1);
+      }
+    } else {
+      console.log('creating question');
+      const questionDoc = await Question.create({
+        ...question,
+      });
+      campaignQuestions.push(String(questionDoc.id));
+    }
   }
-  // async not working as expected
-  // await body.questions.forEach(async (question, ind) => {
-  //   console.log(`ran ${ind + 1}`);
-  //   //check if it is a choice question
-  //   const feedbackType = question.type;
-  //   const hasChoices =
-  //     feedbackType === 'checkbox' ||
-  //     feedbackType === 'range' ||
-  //     feedbackType === 'radio';
-
-  //   if (hasChoices) {
-  //     let errorMessage;
-  //     if (
-  //       feedbackType === 'range' &&
-  //       (!question.choices.length || question.choices.length !== 3)
-  //     ) {
-  //       errorMessage = `Question is of type : range. choices should be an array of size 3 (start, stop & step of the range)`;
-  //     }
-  //     if (!question.choices.length) {
-  //       errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
-  //     }
-  //     if (errorMessage) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         message: errorMessage,
-  //       });
-  //     }
-  //   }
-
-  //   //save question and add choice id to campaignQuestions array;
-  //   const questionDoc = await Question.create({
-  //     ...question,
-  //   });
-  //   console.log(questionDoc.id);
-  //   campaignQuestions.push(String(questionDoc.id));
-  // });
-
+  // console.log(campaignQuestions);
+  // console.log(shouldBeDeletedQuestions);
+  for (let question of shouldBeDeletedQuestions) {
+    await Question.findByIdAndDelete(question);
+    const questionIndex = campaignQuestions.findIndex(
+      (el) => String(el) === String(question)
+    );
+    console.log(question, ' ', questionIndex);
+    if (questionIndex !== -1) {
+      campaignQuestions.splice(questionIndex, 1);
+    }
+  }
+  // console.log(campaignQuestions);
   // update campaign questions property of campaign.
   campaign.campaignQuestions = campaignQuestions;
   await campaign.save();
+  const updatedCampaign = await Campaign.populate(campaign, {
+    path: 'campaignQuestions',
+  });
+
+  // console.log(updatedCampaign);
 
   res.status(200).json({
     success: true,
-    data: campaign,
+    data: updatedCampaign,
   });
 });
 

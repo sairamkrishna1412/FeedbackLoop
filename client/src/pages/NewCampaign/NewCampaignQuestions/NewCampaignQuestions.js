@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Container from '../../../components/UI/Container/Container';
 import Header from '../../../components/UI/Header/Header';
 import PlainCard from '../../../components/UI/Card/PlainCard/PlainCard';
@@ -7,15 +7,19 @@ import QuestionItem from './components/QuestionItem';
 import CampaignSteps from '../CampaignSteps/CampaignSteps';
 import ScrollToTop from '../../../components/UI/ScrollToTop';
 import styles from '../NewCampaign.module.css';
-import { useParams, Redirect } from 'react-router';
+import { useParams, Redirect, useHistory } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { userThunks } from '../../../store/userSlice';
 
 const NewCampaignQuestions = (props) => {
   const { id } = useParams();
-  const campaign = useSelector((state) =>
+  const dispatch = useDispatch();
+  let campaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
+
+  const history = useHistory();
 
   let newQuestion = {
     question: '',
@@ -28,10 +32,12 @@ const NewCampaignQuestions = (props) => {
   let campaignQuestions;
 
   if (
+    campaign &&
     campaign.hasOwnProperty('campaignQuestions') &&
     campaign.campaignQuestions.length
   ) {
-    campaignQuestions = campaign.campaignQuestions;
+    campaignQuestions = [...campaign.campaignQuestions];
+    campaignQuestions.sort((a, b) => a.index - b.index);
   }
 
   if (!campaignQuestions) {
@@ -39,7 +45,7 @@ const NewCampaignQuestions = (props) => {
   }
 
   const [questions, setQuestions] = useState(campaignQuestions);
-
+  // console.log(questions);
   if (!campaign) {
     return <Redirect to="/"></Redirect>;
   }
@@ -102,7 +108,35 @@ const NewCampaignQuestions = (props) => {
     }
     setQuestions(newQuestions);
   };
-  console.log(questions);
+
+  const makeQuestionsSubmitReady = (questions) => {
+    const finalQuestions = [];
+    for (let i = 0; i < questions.length; i++) {
+      const question = { ...questions[i] };
+      if (question.type === 'checkbox' || question.type === 'radio') {
+        if (
+          question.choices.length &&
+          question.choices[0].hasOwnProperty('option')
+        ) {
+          const choices = [...question.choices];
+          const newChoices = choices.map((choice) => choice.option);
+          question.choices = newChoices;
+        }
+      }
+      finalQuestions.push(question);
+    }
+    const submitObj = { campaign_id: id, questions: finalQuestions };
+    return submitObj;
+  };
+
+  const formSubmitHandler = (e) => {
+    e.preventDefault();
+    const submitObj = makeQuestionsSubmitReady(questions);
+    dispatch(userThunks.campaignQuestions(submitObj));
+    history.push(`/newCampaign/${id}/recipients`);
+  };
+
+  // console.log(questions);
   const questionArr = questions.map((question, index) => {
     return (
       <QuestionItem
@@ -127,7 +161,7 @@ const NewCampaignQuestions = (props) => {
           <div className={`${styles['number']} ${styles['number-big']}`}>2</div>
         </div>
         <PlainCard>
-          <form>
+          <form onSubmit={formSubmitHandler}>
             {/* {console.log('this ran', questionArr)} */}
             {questionArr}
             <div className={styles['add-question']}>
@@ -137,6 +171,11 @@ const NewCampaignQuestions = (props) => {
                 onClick={addQuestion}
               ></FontAwesomeIcon>
             </div>
+            <input
+              type="submit"
+              value="Save & Next"
+              className={`btn btn__black ${styles['btn-right']}`}
+            />
           </form>
           {/* <form onSubmit={'sai'}>
             <div className={`${styles['form-wrapper']}`}>
