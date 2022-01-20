@@ -4,12 +4,3 @@
   border-radius: 10px;
   padding: 2rem 0;
 }
-@media screen and (max-width: 480px) 
-{
-  .block {
-    width:78%;
-    min-width: 100%;
-    
-    
-  }
-}
