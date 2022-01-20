@@ -78,25 +78,43 @@ export const userThunks = {
   },
 
   getCampaign: (id) => {
+    return async function (dispatch) {
+      try {
+        dispatch(uiActions.startLoading());
+        let campaign;
+        const response = await axios.get(`/api/campaign/${id}`);
+        if (response.status === 200 && response.data.success) {
+          campaign = response.data.data;
+        }
+        dispatch(userActions.setVisibleCampaign(campaign));
+        dispatch(uiActions.stopLoading());
+      } catch (error) {
+        dispatch(uiActions.stopLoading());
+      }
+    };
+  },
+
+  getCampaignSummary: (id) => {
     return async function (dispatch, getState) {
       try {
         dispatch(uiActions.startLoading());
         // double destructuring
-        const {
-          user: { campaigns },
-        } = getState();
+        // const {
+        //   user: { campaigns },
+        // } = getState();
 
         //here
-        let campaign = { ...campaigns.find((el) => el._id === id) };
+        // let campaign = { ...campaigns.find((el) => el._id === id) };
         // JSON.parse(
         //   JSON.stringify(campaigns.find((el) => el._id === id))
         // );
-        if (!campaign) {
-          const response = await axios.get(`/api/campaign/${id}`);
-          if (response.status === 200 && response.data.success) {
-            campaign = response.data.data;
-          }
+        // if (!campaign) {
+        let campaign;
+        const response = await axios.get(`/api/campaign/${id}`);
+        if (response.status === 200 && response.data.success) {
+          campaign = response.data.data;
         }
+        // }
         if (campaign) {
           const response1 = await axios.get(`/api/campaign/responses/${id}`);
           if (response1.status === 200 && response1.data.success) {
@@ -167,6 +185,29 @@ export const userThunks = {
         if (response.status === 200 && response.data.success) {
           const campaign = response.data.data;
           dispatch(userActions.updateCampaign(campaign));
+        }
+        dispatch(uiActions.stopLoading());
+      } catch (error) {
+        dispatch(uiActions.stopLoading());
+      }
+    };
+  },
+
+  campaignEmails: (campaignEmails) => {
+    return async function (dispatch, getState) {
+      try {
+        dispatch(uiActions.startLoading());
+        const response = await axios.post(
+          `/api/campaign/campaignEmails`,
+          campaignEmails
+        );
+        if (response.status === 200 && response.data.success) {
+          // const currentCampaign = JSON.parse(
+          //   JSON.stringify(getState().visibleCampaign)
+          // );
+          // currentCampaign.campaignEmails =
+          //   currentCampaign.campaignEmails.concat(response.data.data);
+          dispatch(userActions.updateCampaign(response.data.campaign));
         }
         dispatch(uiActions.stopLoading());
       } catch (error) {

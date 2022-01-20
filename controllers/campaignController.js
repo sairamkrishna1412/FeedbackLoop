@@ -64,9 +64,69 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
   });
 });
 
+checkCampaignOwnerWithID = async (campaign_id, user_id) => {
+  try {
+    const campaign = await Campaign.findById(campaign_id)
+      .populate('campaignQuestions')
+      .lean();
+
+    // console.log(campaign);
+    if (!campaign || String(campaign.user) !== user_id) {
+      throw new AppError(400, 'There is no such campaign in your campaigns');
+    }
+    return campaign;
+  } catch (error) {
+    throw error;
+  }
+};
+
 exports.campaignEmails = catchAsync(async (req, res, next) => {
   //check emails
   const { campaign_id: campaign } = req.body;
+  const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
+
+  await CampaignEmail.deleteMany({ campaign });
+
+  const dbEmails = [];
+
+  req.body.campaignEmails.forEach((email) => {
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: `${email} is not an email. please make changes.`,
+      });
+    }
+    dbEmails.push({ campaign, email, sent: false });
+  });
+
+  if (!dbEmails.length) {
+    return res.status(400).json({
+      success: false,
+      message: 'Emails already exist in campaign',
+    });
+  }
+
+  // total valid emails
+  const recipientCount = dbEmails.length;
+  //insert emails
+  const docs = await CampaignEmail.insertMany(dbEmails);
+  curCampaign.campaignEmails = docs;
+  //update campaign recipients property
+  await Campaign.findByIdAndUpdate(campaign, { recipientCount });
+
+  res.status(200).json({
+    success: true,
+    results: docs.length,
+    data: docs,
+    campaign: curCampaign,
+  });
+});
+
+exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
+  //check emails
+  const { campaign_id: campaign } = req.body;
+  const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
+
   const existingEmails = await CampaignEmail.find({ campaign }).select('email');
 
   const emailsArr = existingEmails.map((el) => el.email);
@@ -98,13 +158,6 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
   const docs = await CampaignEmail.insertMany(dbEmails);
   //update campaign recipients property
   await Campaign.findByIdAndUpdate(campaign, { recipientCount });
-  // // check credits are available
-  // if (user.credits < req.body.campaignEmails.length) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: `You don't have enough credits. please buy more credits.`,
-  //   });
-  // }
 
   res.status(200).json({
     success: true,

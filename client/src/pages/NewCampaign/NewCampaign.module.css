@@ -114,10 +114,12 @@ form textarea {
   color: #444;
   font-size: 1.6rem;
   background-color: #d8e4ff;
+  /* font-size: 1rem; */
 }
 
 .form-control optgroup {
   background-color: #d8e4ff;
+  /* font-size: 1rem; */
 }
 
 .btn-right {
@@ -203,6 +205,10 @@ form textarea {
 .question-subhead {
   font-size: 2.2rem;
   margin-top: 4rem;
+}
+
+.form-control__emails {
+  line-height: 1.8;
 }
 
 @media only screen and (max-width: 1550px) {

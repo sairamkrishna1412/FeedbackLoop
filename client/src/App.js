@@ -42,9 +42,9 @@ function App() {
           <Home></Home>
         </Route>
         <Route path="/newCampaign">
-          <Authenticate>
-            <NewCampaign></NewCampaign>
-          </Authenticate>
+          {/* <Authenticate> */}
+          <NewCampaign></NewCampaign>
+          {/* </Authenticate> */}
         </Route>
         <Route path="/campaign/:id">
           <CampaignSummary></CampaignSummary>
