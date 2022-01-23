@@ -41,9 +41,7 @@ const NewCampaign = (props) => {
         <NewCampaignRecipients></NewCampaignRecipients>
       </Route>
       <Route path={`${path}/:id/previewLaunch`}>
-        <Authenticate>
-          <NewCampaignPreviewLaunch></NewCampaignPreviewLaunch>
-        </Authenticate>
+        <NewCampaignPreviewLaunch></NewCampaignPreviewLaunch>
       </Route>
     </Switch>
   );

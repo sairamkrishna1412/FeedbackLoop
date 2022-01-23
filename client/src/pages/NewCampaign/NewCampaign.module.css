@@ -56,8 +56,8 @@
   margin-right: 20px;
 } */
 
-form input,
-form textarea {
+input,
+textarea {
   /* font-family: 'Lato', sans-serif; */
   font-size: 1.8rem;
   color: #444;
@@ -210,6 +210,34 @@ form textarea {
 .form-control__emails {
   line-height: 1.8;
 }
+
+.preview-section {
+  position: relative;
+  margin-bottom: 10rem;
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  padding: 4rem;
+  padding-top: 6rem;
+}
+
+.number-box--preview {
+  top: -3rem;
+}
+
+.plainCard_preview {
+  padding: 7rem 8rem;
+}
+
+/* .number-box--preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.5em;
+  border-top: solid 3px #739ffe;
+  z-index: -1;
+} */
 
 @media only screen and (max-width: 1550px) {
   .form-wrapper--break label {

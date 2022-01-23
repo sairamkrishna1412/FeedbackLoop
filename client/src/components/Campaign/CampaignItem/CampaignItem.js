@@ -5,7 +5,7 @@ import styles from '../Campaign.module.css';
 function CampaignItem(props) {
   const { details } = props;
   let linkTo = '';
-  if (details.lauchedAt) {
+  if (details.launchedAt) {
     linkTo = `/campaign/${details.id}`;
   } else {
     linkTo = `/newCampaign/${details.id}`;

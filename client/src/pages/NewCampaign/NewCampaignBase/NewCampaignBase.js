@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, Redirect } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { userThunks } from '../../../store/userSlice';
 import Container from '../../../components/UI/Container/Container';
@@ -11,6 +11,7 @@ import ScrollToTop from '../../../components/UI/ScrollToTop';
 import styles from '../NewCampaign.module.css';
 
 const NewCampaignBase = (props) => {
+  const { id } = useParams();
   const dispatch = useDispatch();
   const history = useHistory();
   const newCampaignObj = {
@@ -19,7 +20,6 @@ const NewCampaignBase = (props) => {
     previewText: '',
     emailContent: '',
   };
-  const { id } = useParams();
 
   let reqCampaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
@@ -42,6 +42,15 @@ const NewCampaignBase = (props) => {
   }
 
   const [campaign, setCampaign] = useState(reqCampaign);
+  // first thing to do is if campaign is lauched redirect to summary page;
+  if (
+    campaign &&
+    campaign.hasOwnProperty('launchedAt') &&
+    campaign.launchedAt
+  ) {
+    return <Redirect to={`/campaign/${id}`}></Redirect>;
+  }
+
   // console.log(campaign);
   const inputChangeHandler = (e) => {
     setCampaign((state) => {
