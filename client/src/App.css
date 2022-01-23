@@ -112,8 +112,8 @@
   /* animation: linkcolor 0.5s linear 0.1s infinite normal; */
 }
 
-.btn--black {
-  background: #000000;
+.btn__black {
+  background: #191919;
   color: #fff;
 }
 
@@ -151,5 +151,32 @@
   .logo {
     font-size: 2.4rem;
     font-weight: 300;
+  }
+}
+@media screen and (max-width: 480px) 
+{
+   .logo{
+     font-size: 2.6rem;
+     font-weight: 350;
+   }
+   .btn {
+    padding: 1.1rem 4.1rem;
+    border-radius: 3rem;
+    border: 1px solid #000000;
+    font-size: 1.5rem;
+    text-decoration: none;
+    font-weight: 300;
+    display: inline-block;
+    cursor: pointer;
+    margin-right:  auto;
+  }
+  .subHeading {
+    font-size: 2.3rem;
+    font-weight: 280;
+    color: #191919;
+    margin-bottom: 55px;
+  }
+  .container{
+    width: 90%;
   }
 }

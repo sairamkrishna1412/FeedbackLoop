@@ -31,3 +31,13 @@
   font-size: 2.4rem;
   font-weight: 400;
 }
+@media screen and (min-device-width: 480px) 
+{
+  .campsRow span {
+    display: inline-block;
+    width: 32%;
+    text-align: center;
+    font-size: 2rem;
+  }
+  
+}

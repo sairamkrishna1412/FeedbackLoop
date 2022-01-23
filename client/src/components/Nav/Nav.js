@@ -21,6 +21,7 @@ function Nav({ isLoggedIn }) {
 
   if (!isLoggedIn || !user) {
     navLeftContent = (
+      
       <ul>
         <li>
           <NavLink
@@ -41,6 +42,7 @@ function Nav({ isLoggedIn }) {
           </NavLink>
         </li>
       </ul>
+      
     );
     navRightContent = (
       <ul>

@@ -6,6 +6,7 @@ import NewCampaignQuestions from './NewCampaignQuestions/NewCampaignQuestions';
 import NewCampaignRecipients from './NewCampaignRecipients/NewCampaignRecipients';
 import NewCampaignPreviewLaunch from './NewCampaignPreviewLaunch/NewCampaignPreviewLaunch';
 import NewCampaignNavigate from './NewCampaignNavigate';
+import Authenticate from '../../components/Auth/Authenticate';
 
 // import styles from './NewCampaign.module.css';
 
@@ -17,7 +18,9 @@ const NewCampaign = (props) => {
   return (
     <Switch>
       <Route path={path} exact>
-        <NewCampaignBase></NewCampaignBase>
+        <Authenticate>
+          <NewCampaignBase></NewCampaignBase>
+        </Authenticate>
       </Route>
       <Route path={`${path}/:id`} exact>
         <NewCampaignNavigate></NewCampaignNavigate>
@@ -25,16 +28,22 @@ const NewCampaign = (props) => {
 
       {/* yet to be implemented */}
       <Route path={`${path}/:id/base`}>
-        <NewCampaignBase></NewCampaignBase>
+        <Authenticate>
+          <NewCampaignBase></NewCampaignBase>
+        </Authenticate>
       </Route>
       <Route path={`${path}/:id/questions`}>
-        <NewCampaignQuestions></NewCampaignQuestions>
+        <Authenticate>
+          <NewCampaignQuestions></NewCampaignQuestions>
+        </Authenticate>
       </Route>
       <Route path={`${path}/:id/recipients`}>
         <NewCampaignRecipients></NewCampaignRecipients>
       </Route>
       <Route path={`${path}/:id/previewLaunch`}>
-        <NewCampaignPreviewLaunch></NewCampaignPreviewLaunch>
+        <Authenticate>
+          <NewCampaignPreviewLaunch></NewCampaignPreviewLaunch>
+        </Authenticate>
       </Route>
     </Switch>
   );
