@@ -15,7 +15,7 @@ import { userThunks } from '../../../store/userSlice';
 const NewCampaignQuestions = (props) => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  let campaign = useSelector((state) =>
+  const campaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
 
@@ -46,6 +46,15 @@ const NewCampaignQuestions = (props) => {
 
   const [questions, setQuestions] = useState(campaignQuestions);
   // console.log(questions);
+
+  if (
+    campaign &&
+    campaign.hasOwnProperty('launchedAt') &&
+    campaign.launchedAt
+  ) {
+    return <Redirect to={`/campaign/${id}`}></Redirect>;
+  }
+
   if (!campaign) {
     return <Redirect to="/"></Redirect>;
   }
@@ -177,57 +186,6 @@ const NewCampaignQuestions = (props) => {
               className={`btn btn__black ${styles['btn-right']}`}
             />
           </form>
-          {/* <form onSubmit={'sai'}>
-            <div className={`${styles['form-wrapper']}`}>
-              <label htmlFor="campaignName">Campaign Name</label>
-              <input
-                type="text"
-                name="campaignName"
-                className={`${styles['form-control']}`}
-                onChange={inputChangeHandler}
-                value={campaign.campaignName}
-              />
-            </div>
-            <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
-              <label htmlFor="emailSubject">Email Subject</label>
-              <input
-                type="text"
-                name="emailSubject"
-                className={`${styles['form-control']}`}
-                onChange={inputChangeHandler}
-                value={campaign.emailSubject}
-              />
-            </div>
-            <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
-              <label htmlFor="previewText">Preview text</label>
-              <input
-                type="text"
-                name="previewText"
-                className={`${styles['form-control']}`}
-                onChange={inputChangeHandler}
-                value={campaign.previewText}
-              />
-            </div>
-            <div className={styles['separator']}></div>
-            <div className={`${styles['form-wrapper']}`}>
-              <label htmlFor="emailContent">Email Content</label>
-              <textarea
-                type="text"
-                name="emailContent"
-                className={`${styles['form-control']}`}
-                onChange={inputChangeHandler}
-                value={campaign.emailContent}
-              />
-            </div>
-            <div className={styles['separator']}></div>
-            <input
-              type="submit"
-              value="Save & Next"
-              className={`btn btn-black ${styles['btn-right']}`}
-            />
-          </form> */}
         </PlainCard>
         <CampaignSteps></CampaignSteps>
       </Container>

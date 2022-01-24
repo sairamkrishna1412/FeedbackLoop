@@ -38,6 +38,8 @@ const userSlice = createSlice({
       );
       if (reqCampIndex !== -1) {
         state.campaigns[reqCampIndex] = campaign;
+      } else {
+        state.campaigns.push(campaign);
       }
     },
     setVisibleCampaign: (state, action) => {
@@ -66,8 +68,8 @@ export const userThunks = {
         if (response.status === 200 && response.data.success) {
           // divide the campaigns into lauched, unlaunched. (active, inactive : later)
           const campaigns = response.data.data;
-          // const launched = campaigns.filter((el) => el.lauchedAt);
-          // const unLaunched = campaigns.filter((el) => !el.lauchedAt);
+          // const launched = campaigns.filter((el) => el.launchedAt);
+          // const unLaunched = campaigns.filter((el) => !el.launchedAt);
           dispatch(userActions.setCampaigns(campaigns));
         }
         dispatch(uiActions.stopLoading());
@@ -86,7 +88,8 @@ export const userThunks = {
         if (response.status === 200 && response.data.success) {
           campaign = response.data.data;
         }
-        dispatch(userActions.setVisibleCampaign(campaign));
+        // dispatch(userActions.setVisibleCampaign(campaign));
+        dispatch(userActions.updateCampaign(campaign));
         dispatch(uiActions.stopLoading());
       } catch (error) {
         dispatch(uiActions.stopLoading());
@@ -123,6 +126,7 @@ export const userThunks = {
         }
 
         dispatch(userActions.setVisibleCampaign(campaign));
+        // dispatch(userActions.updateCampaign(campaign));
 
         dispatch(uiActions.stopLoading());
       } catch (error) {
@@ -211,6 +215,33 @@ export const userThunks = {
         }
         dispatch(uiActions.stopLoading());
       } catch (error) {
+        dispatch(uiActions.stopLoading());
+      }
+    };
+  },
+
+  launchCampaign: (id) => {
+    return async function (dispatch, getState) {
+      try {
+        dispatch(uiActions.startLoading());
+        const response = await axios.post(`/api/campaign/launch`, {
+          campaign_id: id,
+        });
+        console.log(id);
+        if (response.status === 200 && response.data.success) {
+          const state = getState();
+          let campaign = state.user.campaigns.find(
+            (el) => el._id === String(id)
+          );
+          campaign = { ...campaign };
+          if (campaign) {
+            campaign.launchedAt = response.data.data;
+          }
+          dispatch(userActions.updateCampaign(campaign));
+        }
+        dispatch(uiActions.stopLoading());
+      } catch (error) {
+        console.log(error);
         dispatch(uiActions.stopLoading());
       }
     };

@@ -13,23 +13,30 @@ import { useParams, Redirect } from 'react-router';
 import { userThunks } from '../../../store/userSlice';
 
 const NewCampaignRecipients = (props) => {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const history = useHistory();
+
   const [recipients, setRecipients] = useState('');
   const [valid, setIsValid] = useState(false);
   // console.log(recipients);
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const { id } = useParams();
 
   const isPageLoading = useSelector((state) => state.ui.pageLoading);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const campaign = useSelector((state) => state.user.visibleCampaign);
+
+  const campaign = useSelector((state) =>
+    state.user.campaigns.find((el) => el._id === id)
+  );
   // console.log(campaign);
-  useEffect(() => {
-    dispatch(userThunks.getCampaign(id));
-  }, [dispatch, id]);
 
   useEffect(() => {
-    if (campaign.hasOwnProperty('campaignEmails')) {
+    if (!campaign || !campaign.hasOwnProperty('campaignEmails')) {
+      dispatch(userThunks.getCampaign(id));
+    }
+  }, [dispatch, id, campaign]);
+
+  useEffect(() => {
+    if (campaign && campaign.hasOwnProperty('campaignEmails')) {
       const campaignEmails = campaign.campaignEmails
         .map((el) => el.email)
         .join(',');
@@ -37,6 +44,13 @@ const NewCampaignRecipients = (props) => {
     }
   }, [campaign]);
 
+  if (
+    campaign &&
+    campaign.hasOwnProperty('launchedAt') &&
+    campaign.launchedAt
+  ) {
+    return <Redirect to={`/campaign/${id}`}></Redirect>;
+  }
   // why is this wrong
   // let campaignEmails;
   // if (firstLoad && campaign.hasOwnProperty('campaignEmails')) {
@@ -91,12 +105,40 @@ const NewCampaignRecipients = (props) => {
       }
     }
   };
+  // let textareaItem = (
+  //   <textarea
+  //     name="recipents"
+  //     id="recipients"
+  //     className={`${styles['form-control']} ${styles['form-control--break']} ${styles['form-control__emails']}`}
+  //     cols="30"
+  //     rows="10"
+  //     onChange={recipientChangeHandler}
+  //     value={recipients}
+  //   ></textarea>
+  // );
+
+  // if (props.preview) {
+  //   textareaItem = (
+  //     <textarea
+  //       name="recipents"
+  //       id="recipients"
+  //       className={`${styles['form-control']} ${styles['form-control--break']} ${styles['form-control__emails']}`}
+  //       cols="30"
+  //       rows="10"
+  //       value={recipients}
+  //       readOnly
+  //     ></textarea>
+  //   );
+  // }
+
   return (
     <div className="container">
       <ScrollToTop />
       <Header></Header>
       <h2 className={`subHeading`}>
-        {campaign.campaignName !== '' ? campaign.campaignName : 'New Campaign'}
+        {campaign.campaignName !== ''
+          ? `${campaign.campaignName}`
+          : 'New Campaign'}
       </h2>
       <Container className={styles['container-wrapper']}>
         <div className={`${styles['number-box']} ${styles['number-box--top']}`}>

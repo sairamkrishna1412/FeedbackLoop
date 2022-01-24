@@ -14,7 +14,14 @@ const creditRoutes = require('./routes/creditRoutes');
 const campaignRoutes = require('./routes/campaignRoutes');
 const errorHandler = require('./controllers/errorController');
 
-mongoose.connect(keys.mongoURI);
+mongoose.connect(keys.mongoURI).then(
+  () => {
+    console.log('MongoDB server up 📔️ 📔️ 📔️');
+  },
+  (err) => {
+    console.log('Error connecting to mongoDB server ', err);
+  }
+);
 
 const app = express();
 
@@ -66,5 +73,5 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`App Up and Running on port : ${PORT}`);
+  console.log(`App Up and Running on port : ${PORT} 💫️ 💫️ 💫️`);
 });

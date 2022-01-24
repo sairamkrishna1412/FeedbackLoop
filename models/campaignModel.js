@@ -88,7 +88,7 @@ const campaignSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  lauchedAt: {
+  launchedAt: {
     type: Date,
     default: null,
   },
