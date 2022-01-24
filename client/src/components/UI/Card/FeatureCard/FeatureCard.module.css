@@ -26,3 +26,9 @@
   font-weight: 300;
   margin: 1rem;
 }
+
+@media only screen and (max-width: 480px) {
+  .cardContainer{
+    margin-bottom: 2rem;
+  }
+}

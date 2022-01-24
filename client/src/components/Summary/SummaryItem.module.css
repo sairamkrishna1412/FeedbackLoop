@@ -33,6 +33,7 @@
   }
   .summaryHeading {
     font-size: 1.8rem;
-    text-align: center;
+     height: 40px;
   }
+  
 }
