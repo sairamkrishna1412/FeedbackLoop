@@ -9,6 +9,7 @@ const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const dummyEmail = require('../services/dummyEmail');
 
 exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
   const reqCampaign = await Campaign.findById(req.params.id).lean();
@@ -454,7 +455,8 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
   const from = `${req.user.email}`;
   const to = emailsArr;
   const subject = campaign.emailSubject;
-  const html = `<p>${campaign.emailContent}</p>`;
+  // const html = `<p>${campaign.emailContent}</p>`;
+  const html = `${dummyEmail}`;
 
   const mailSent = await sendMail(from, to, subject, html);
   if (!mailSent) {

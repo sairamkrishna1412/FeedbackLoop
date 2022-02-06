@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../NewCampaign.module.css';
-import { useParams, useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 const NewCampaignPreviewButton = (props) => {
   const { pathname } = useLocation();
