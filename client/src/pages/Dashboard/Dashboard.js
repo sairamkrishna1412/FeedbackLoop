@@ -14,8 +14,8 @@ import styles from './Dashboard.module.css';
 function Dashboard() {
   const userState = useSelector((state) => state.user);
   const authState = useSelector((state) => state.auth);
-  const lauchedCamps = userState.campaigns.filter((el) => el.lauchedAt);
-  const unLauchedCamps = userState.campaigns.filter((el) => !el.lauchedAt);
+  const lauchedCamps = userState.campaigns.filter((el) => el.launchedAt);
+  const unLauchedCamps = userState.campaigns.filter((el) => !el.launchedAt);
   return (
     <React.Fragment>
       <div className={`container`}>

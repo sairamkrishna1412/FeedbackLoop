@@ -15,7 +15,7 @@ function CampaignCont(props) {
       createdOn: new Date(campaign.createdAt).toLocaleString(undefined, {
         dateStyle: 'short',
       }),
-      lauchedAt: campaign.lauchedAt ? new Date(campaign.lauchedAt) : null,
+      launchedAt: campaign.launchedAt ? new Date(campaign.launchedAt) : null,
     };
     return (
       <CampaignItem details={campaignSummary} key={campaign._id}></CampaignItem>

@@ -9,6 +9,7 @@ const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const dummyEmail = require('../services/dummyEmail');
 
 exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
   const reqCampaign = await Campaign.findById(req.params.id).lean();
@@ -179,7 +180,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     });
   }
 
-  if (campaign.lauchedAt || campaign.respondedRecipientCount > 0) {
+  if (campaign.launchedAt || campaign.respondedRecipientCount > 0) {
     return next(
       new AppError(
         400,
@@ -428,14 +429,18 @@ exports.clearResponses = catchAsync(async (req, res, next) => {
 exports.launchCampaign = catchAsync(async (req, res, next) => {
   //get campaign
   const { campaign_id } = req.body;
-
-  const campaign = await Campaign.findOne({
-    id: campaign_id,
-    user: req.user.id,
-  }).populate('campaignQuestions');
-
+  // console.log(campaign_id);
+  // here unable to get correct campaign if findOne({id : campaign_id}) is used, for me waddup campaign is returned irrespective of campaign_id in req.body;
+  const campaign = await Campaign.findById(campaign_id).populate(
+    'campaignQuestions'
+  );
+  // console.log(campaign);
   if (!campaign) {
     return next(new AppError(400, 'Campaign not found.'));
+  }
+
+  if (!campaign || String(campaign.user) !== req.user.id) {
+    throw new AppError(400, 'There is no such campaign in your campaigns');
   }
 
   //find associated emails
@@ -450,7 +455,8 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
   const from = `${req.user.email}`;
   const to = emailsArr;
   const subject = campaign.emailSubject;
-  const html = `<p>${campaign.emailContent}</p>`;
+  // const html = `<p>${campaign.emailContent}</p>`;
+  const html = `${dummyEmail}`;
 
   const mailSent = await sendMail(from, to, subject, html);
   if (!mailSent) {
@@ -459,9 +465,11 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
 
   campaign.launchedAt = Date.now();
   await campaign.save();
+  console.log(campaign);
   //send nodemail emails
   res.status(200).json({
     success: true,
+    data: campaign.launchedAt,
     message: 'Mails were succesfully sent.',
   });
 });
