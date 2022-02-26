@@ -32,6 +32,7 @@ app.use(
     keys: [keys.cookieKey],
   })
 );
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 // app.use(
 //   expressSession({

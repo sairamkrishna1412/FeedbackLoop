@@ -1,0 +1,641 @@
+<html>
+  <head>
+    <title>Feedback Loop - feedback</title>
+  </head>
+  <body>
+    <center>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+      </style>
+      <table
+        style="font-family: 'Montserrat', sans-serif"
+        width="100%"
+        border="0"
+        cellpadding="0"
+        cellspacing="0"
+        align="center"
+        valign="top"
+      >
+        <tbody>
+          <tr>
+            <td>
+              <table
+                border="0"
+                cellpadding="0"
+                cellspacing="0"
+                align="center"
+                valign="top"
+                bgcolor="#ffffff"
+                style="padding: 0 10px !important; max-width: 500px; width: 100%"
+              >
+                <tbody>
+                  <!-- common -->
+                  <tr>
+                    <td align="center" style="padding: 10px 0 0px 0">
+                      <table
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        width="100%"
+                        style="
+                          max-width: 500px;
+                          border-bottom: 1px solid #e4e4e4;
+                        "
+                      >
+                        <tbody>
+                          <tr>
+                            <!-- the line height propertry is used to set the height of the blue box -->
+                            <td
+                              valign="middle"
+                              bgcolor="#739ffe"
+                              style="
+                                padding: 0px;
+                                color: #111111;
+                                font-size: 48px;
+                                font-weight: 400;
+                                line-height: 60px;
+                                padding: 15px;
+                              "
+                            >
+                              <a
+                                href="https://feedbackloop-dev.herokuapp.com/"
+                                target="_blank"
+                                data-saferedirecturl="https://feedbackloop-dev.herokuapp.com/"
+                                style="
+                                  font-size: 16px;
+                                  color: #333;
+                                  font-weight: 400;
+                                  text-decoration: none;
+                                "
+                                >FeedbackLoop</a
+                              >
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td bgcolor="#ffffff" align="center" style="padding: 0">
+                      <table
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        width="100%"
+                        style="
+                          max-width: 500px;
+                          border-bottom: 1px solid #e4e4e4;
+                        "
+                      >
+                        <tbody>
+                          <tr>
+                            <td
+                              bgcolor="#ffffff"
+                              align="left"
+                              style="
+                                padding: 40px 20px 10px;
+                                font-size: 32px;
+                                font-weight: 400;
+                              "
+                            >
+                              <h1
+                                style="
+                                  font-style: normal;
+                                  font-weight: bold;
+                                  font-size: 18px;
+                                  color: #3d3d3d;
+                                  margin-bottom: 2px;
+                                  line-height: 30px;
+                                "
+                              >
+                                Feedback Loop - feedback
+                              </h1>
+                              <p style="font-size : 16px; line-height : 24px;">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi dicta ipsum repudiandae at consequuntur! Velit blanditiis minus praesentium sint, consectetur rerum cumque natus autem sunt repellat eligendi magni veritatis assumenda beatae quod, doloribus esse delectus earum dicta molestiae commodi id. Veniam, pariatur aliquam! Esse quae eveniet odio aut laudantium tenetur unde perferendis sit, adipisci illo, quo veritatis maiores assumenda! Ex, earum! Aspernatur dolor harum consectetur expedita odio fugiat itaque eligendi rerum reiciendis, est libero esse rem voluptatem aut repudiandae deleniti fugit officiis pariatur temporibus nobis quaerat animi. Aut ipsa magni laboriosam asperiores doloribus est veniam error, dignissimos rerum omnis saepe labore repellendus dolorum cumque dolores quis eaque sit obcaecati? Tempore soluta voluptates laborum molestias rem eveniet perferendis iure praesentium tempora aspernatur itaque dolor iste magnam dolores illo possimus saepe, accusantium accusamus deserunt nemo totam! Dicta officia quia nam nesciunt iure possimus vel labore, qui rem maiores. Excepturi tenetur numquam mollitia.
+                              </p>
+                              <hr
+                                style="
+                                  width: 30px;
+                                  float: left;
+                                  height: 1.5px;
+                                  background: black;
+                                "
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td bgcolor="#ffffff" align="center" style="padding: 0">
+                      <table
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        width="100%"
+                        style="
+                          max-width: 500px;
+                          border-bottom: 1px solid #e4e4e4;
+                        "
+                      >
+                        <tbody>
+                          <tr>
+                            <td
+                              bgcolor="#ffffff"
+                              align="left"
+                              style="
+                                padding: 40px 20px 10px;
+                                font-size: 32px;
+                                font-weight: 400;
+                              "
+                            >
+                              <div
+                                style="margin: 20px auto 120px; font-size: 16px"
+                                class="div-6"
+                              >
+                              <!-- continue here -->
+                                <form action="http://localhost:5000/api/campaign/response" method="post">
+                                  <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q1. How was our application? (0 to 10)
+        </div>
+        <div
+        style="margin: 25px auto 20px"
+        >
+        <div class=""><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_0">0</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_1">1</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_2">2</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_3">3</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_4">4</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_5">5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_6">6</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_7">7</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_8">8</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_9">9</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b7faee9e12450b0b67b_10">10</label></span></div>
+        <div class="" style="margin-top: 15px"><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_0"
+            value="0"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_1"
+            value="1"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_2"
+            value="2"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_3"
+            value="3"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_4"
+            value="4"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_5"
+            value="5"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_6"
+            value="6"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_7"
+            value="7"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_8"
+            value="8"/><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_9"
+            value="9"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b7faee9e12450b0b67b"
+            id="62185b7faee9e12450b0b67b_10"
+            value="10"/></div>
+        </div>
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q2. How was our application? (0 to 5)
+        </div>
+        <div
+        style="margin: 25px auto 20px"
+        >
+        <div class=""><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_0">0</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_0.5">0.5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_1">1</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_1.5">1.5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_2">2</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_2.5">2.5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_3">3</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_3.5">3.5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_4">4</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_4.5">4.5</label></span><span style="margin: 5px 12px 5px 5px"><label for="62185b80aee9e12450b0b67d_5">5</label></span></div>
+        <div class="" style="margin-top: 15px"><input style="margin: 5px 8px 5px 5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_0"
+            value="0"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_0.5"
+            value="0.5"/><input style="margin: 5px 8px 5px 9.5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_1"
+            value="1"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_1.5"
+            value="1.5"/><input style="margin: 5px 8px 5px 9.5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_2"
+            value="2"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_2.5"
+            value="2.5"/><input style="margin: 5px 8px 5px 9.5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_3"
+            value="3"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_3.5"
+            value="3.5"/><input style="margin: 5px 8px 5px 9.5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_4"
+            value="4"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_4.5"
+            value="4.5"/><input style="margin: 5px 8px 5px 9.5px;"
+            type="radio"
+            name="62185b80aee9e12450b0b67d"
+            id="62185b80aee9e12450b0b67d_5"
+            value="5"/></div>
+        </div>
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q3. Range Test
+        </div>
+        <div
+        style="margin: 25px auto 20px"
+        >
+        <div class=""><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_10">10</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_11">11</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_12">12</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_13">13</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_14">14</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_15">15</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_16">16</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_17">17</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_18">18</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_19">19</label></span><span style="margin: 5px 12px 5px 5px"><label for="6218df3ca8cbe466c0b56960_20">20</label></span></div>
+        <div class="" style="margin-top: 15px"><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_10"
+            value="10"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_11"
+            value="11"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_12"
+            value="12"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_13"
+            value="13"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_14"
+            value="14"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_15"
+            value="15"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_16"
+            value="16"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_17"
+            value="17"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_18"
+            value="18"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_19"
+            value="19"/><input style="margin: 5px 8px 5px 12px;"
+            type="radio"
+            name="6218df3ca8cbe466c0b56960"
+            id="6218df3ca8cbe466c0b56960_20"
+            value="20"/></div>
+        </div>
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q4. What is your age?
+        </div>
+        <div style="margin-top: 15px">
+          <input
+            name="62185b80aee9e12450b0b67f"
+            style="
+              width: 97%;
+              height: 30px;
+              padding: 5px;
+              outline: none;
+            "
+            type="number"
+            min=1
+            max=130
+            placeholder="Enter a number between 1 and 130"
+          />
+        </div>
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q5. Give us a review about our product?
+        </div>
+        <div style="margin-top: 15px">
+          <input
+            name="62185b81aee9e12450b0b681"
+            style="
+              width: 97%;
+              height: 30px;
+              padding: 5px;
+              outline: none;
+            "
+            type="text"
+            maxlength=250
+            placeholder="Enter text of maximum 250 characters"
+          />
+          </div>
+        </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q6. Which did you like the most in our product?
+        </div>
+          
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="radio"
+          name="62185b81aee9e12450b0b683"
+          id="62185b81aee9e12450b0b683_0"
+          value="Frontend"
+        />
+        <label for="62185b81aee9e12450b0b683_0">Frontend</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="radio"
+          name="62185b81aee9e12450b0b683"
+          id="62185b81aee9e12450b0b683_1"
+          value="Backend"
+        />
+        <label for="62185b81aee9e12450b0b683_1">Backend</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="radio"
+          name="62185b81aee9e12450b0b683"
+          id="62185b81aee9e12450b0b683_2"
+          value="Both"
+        />
+        <label for="62185b81aee9e12450b0b683_2">Both</label>
+      </div>
+      
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q7. Where should we improve?
+        </div>
+          
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="checkbox"
+          name="62185b82aee9e12450b0b685"
+          id="62185b82aee9e12450b0b685_0"
+          value="Frontend"
+        />
+        <label for="62185b82aee9e12450b0b685_0">Frontend</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="checkbox"
+          name="62185b82aee9e12450b0b685"
+          id="62185b82aee9e12450b0b685_1"
+          value="Backend"
+        />
+        <label for="62185b82aee9e12450b0b685_1">Backend</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="checkbox"
+          name="62185b82aee9e12450b0b685"
+          id="62185b82aee9e12450b0b685_2"
+          value="Price"
+        />
+        <label for="62185b82aee9e12450b0b685_2">Price</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="checkbox"
+          name="62185b82aee9e12450b0b685"
+          id="62185b82aee9e12450b0b685_3"
+          value="Functionality"
+        />
+        <label for="62185b82aee9e12450b0b685_3">Functionality</label>
+      </div>
+     
+      <div style="margin-top: 15px; display: flex; align-items: center" class="div-9">
+        <input
+          style="
+            width: 5%;
+            height: 18px;
+            padding: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          type="checkbox"
+          name="62185b82aee9e12450b0b685"
+          id="62185b82aee9e12450b0b685_4"
+          value="Others"
+        />
+        <label for="62185b82aee9e12450b0b685_4">Others</label>
+      </div>
+    
+      </div> <div
+        style="
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 30px;
+          border-color: rgba(0, 0, 0, 1);
+          border-width: 1px;
+          border-style: solid;
+        "
+      >
+        <div
+          style="font-size: 16px; line-height: 20px"
+        >
+          Q8. When did you last use our product?
+        </div>
+        <div style="margin-top: 15px" class="div-9">
+          <input
+            name="62185b82aee9e12450b0b687"
+            style="width: 97%; height: 30px; padding: 5px; outline: none"
+            type="date"
+            min=2021-11-20
+            max=2022-02-25
+          />
+        </div>
+      </div>
+                                  <input type="hidden" name="campaign_id" value="61d2b3a7a7a1298b736b7831"/>
+                                  <input type="hidden" name="email" value="{%EMAIL%}"/>
+
+                                  <input
+                                    style="
+                                      display: block;
+                                      width: 50%;
+                                      padding: 10px 25px;
+                                      background-color: #739ffe;
+                                      border: none;
+                                      margin: 10px auto;
+                                      border-radius: 10px;
+                                      cursor: pointer;
+                                      color: #333;
+                                    "
+                                    type="submit"
+                                    value="Submit"
+                                  />
+                                </form>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </center>
+  </body>
+</html>

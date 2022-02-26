@@ -9,7 +9,8 @@ const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const dummyEmail = require('../services/dummyEmail');
+// const dummyEmail = require('../services/EmailMarkups');
+const createForm = require('../services/createForm');
 
 exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
   const reqCampaign = await Campaign.findById(req.params.id).lean();
@@ -174,10 +175,9 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
   //get campaign_id to which question belongs to.
   const campaign = await Campaign.findById(body.campaign_id);
   if (!campaign) {
-    return res.status(400).json({
-      success: false,
-      message: `Campaign with id : ${body.campaign_id} doesn't exist.`,
-    });
+    return next(
+      new AppError(400, `Campaign with id : ${body.campaign_id} doesn't exist.`)
+    );
   }
 
   if (campaign.launchedAt || campaign.respondedRecipientCount > 0) {
@@ -204,7 +204,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       )
     );
   }
-
+  // console.log(bodyQuestions);
   // create new question doc for each question after successful validation.
   const orderedBodyQuestions = bodyQuestions.sort((a, b) => a.index - b.index);
   // console.log(orderedBodyQuestions);
@@ -234,29 +234,24 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     if (hasChoices) {
       let errorMessage;
       if (
-        (feedbackType === 'range' || feedbackType === 'date') &&
+        feedbackType === 'range' &&
         (!question.choices.length || question.choices.length !== 3)
       ) {
-        errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & ${
-          'step of the range' ? feedbackType === 'range' : 'default date'
-        })`;
+        errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & step of the range)`;
       }
+
       if (feedbackType === 'date') {
         const start = new Date(question.choices[0]);
         const stop = new Date(question.choices[1]);
-        const defaultVal = new Date(
-          question.choices[2] ? question.choices[2] : question.choices[0]
-        );
         if (start > stop) {
           errorMessage = `Question is of type : ${feedbackType}. Start date is before Stop date. Please make changes`;
         }
-        if (defaultVal < start || defaultVal > stop) {
-          errorMessage = `Question is of type : ${feedbackType}. Default value should lie between ${start} and ${stop}`;
-        }
       }
+
       if (!question.choices.length) {
         errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
       }
+
       if (errorMessage) {
         return res.status(400).json({
           success: false,
@@ -272,11 +267,15 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       );
       if (existingQuestionInd !== -1) {
         const updateId = shouldBeDeletedQuestions[existingQuestionInd]._id;
-        await Question.findByIdAndUpdate(updateId, { ...question });
+        if (question.hasOwnProperty('isUpdated') && question.isUpdated) {
+          await Question.findByIdAndUpdate(updateId, {
+            ...question,
+          });
+        }
         shouldBeDeletedQuestions.splice(existingQuestionInd, 1);
       }
     } else {
-      console.log('creating question');
+      // console.log('creating question');
       const questionDoc = await Question.create({
         ...question,
       });
@@ -290,7 +289,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     const questionIndex = campaignQuestions.findIndex(
       (el) => String(el) === String(question)
     );
-    console.log(question, ' ', questionIndex);
+    // console.log(question, ' ', questionIndex);
     if (questionIndex !== -1) {
       campaignQuestions.splice(questionIndex, 1);
     }
@@ -302,9 +301,12 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
   const updatedCampaign = await Campaign.populate(campaign, {
     path: 'campaignQuestions',
   });
+  updatedCampaign.toObject();
 
-  // console.log(updatedCampaign);
-
+  updatedCampaign.campaignQuestions = updatedCampaign.campaignQuestions.sort(
+    (a, b) => a.index - b.index
+  );
+  // console.log(updatedCampaign.campaignQuestions);
   res.status(200).json({
     success: true,
     data: updatedCampaign,
@@ -316,6 +318,10 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
   const reqCampaign = await Campaign.findById(req.params.id)
     .populate('campaignQuestions')
     .lean();
+
+  reqCampaign.campaignQuestions = reqCampaign.campaignQuestions.sort(
+    (a, b) => a.index - b.index
+  );
 
   if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
     return next(
@@ -430,6 +436,7 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
   //get campaign
   const { campaign_id } = req.body;
   // console.log(campaign_id);
+
   // here unable to get correct campaign if findOne({id : campaign_id}) is used, for me waddup campaign is returned irrespective of campaign_id in req.body;
   const campaign = await Campaign.findById(campaign_id).populate(
     'campaignQuestions'
@@ -453,23 +460,38 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
   const emailsArr = emails.map((emailObj) => emailObj.email);
 
   const from = `${req.user.email}`;
-  const to = emailsArr;
+  // const to = emailsArr;
   const subject = campaign.emailSubject;
-  // const html = `<p>${campaign.emailContent}</p>`;
-  const html = `${dummyEmail}`;
+  const html = createForm.createForm(campaign);
+  const unSentEmails = [];
+  let to, mailSent, userHtml;
 
-  const mailSent = await sendMail(from, to, subject, html);
-  if (!mailSent) {
-    return next(new AppError(500, 'Something went wrong'));
+  for (let i = 0; i < emailsArr.length; i++) {
+    to = emailsArr[i];
+    userHtml = html.replace('{%EMAIL%}', to);
+    mailSent = await sendMail(from, to, subject, userHtml);
+    if (!mailSent) {
+      unSentEmails.push(to);
+    }
   }
 
+  if (unSentEmails.length === emailsArr.length) {
+    return next(
+      new AppError(
+        500,
+        'Could not send mails, something went wrong. please try again.'
+      )
+    );
+  }
+
+  campaign.recipientCount = emailsArr.length - unSentEmails.length;
   campaign.launchedAt = Date.now();
   await campaign.save();
-  console.log(campaign);
+  // console.log(campaign);
   //send nodemail emails
   res.status(200).json({
     success: true,
-    data: campaign.launchedAt,
+    data: { launchedAt: campaign.launchedAt, unSentEmails },
     message: 'Mails were succesfully sent.',
   });
 });
@@ -477,6 +499,8 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
 exports.response = catchAsync(async (req, res) => {
   //get campaign mails
   const { body } = req;
+  console.log('received!!!');
+  console.log(body);
   const campaignEmails = await CampaignEmail.find({
     campaign: body.campaign_id,
   });
@@ -529,7 +553,7 @@ exports.response = catchAsync(async (req, res) => {
           ) {
             return res.status(400).json({
               success: false,
-              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
+              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`,
             });
           }
 

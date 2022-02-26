@@ -64,6 +64,7 @@ const NewCampaignPreviewLaunch = (props) => {
   let questionsArr = [];
   if (campaign && campaign.hasOwnProperty('campaignQuestions')) {
     const questions = campaign.campaignQuestions;
+    console.log('preview question : ', questions);
     questionsArr = questions.map((question, index) => {
       return (
         <PreviewQuestionItem

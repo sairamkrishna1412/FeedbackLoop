@@ -36,6 +36,7 @@ const userSlice = createSlice({
       const reqCampIndex = state.campaigns.findIndex(
         (el) => el._id === campaign._id
       );
+      console.log(reqCampIndex);
       if (reqCampIndex !== -1) {
         state.campaigns[reqCampIndex] = campaign;
       } else {
@@ -186,12 +187,15 @@ export const userThunks = {
           `/api/campaign/campaignQuestions`,
           campaignQuestions
         );
+        console.log(response);
         if (response.status === 200 && response.data.success) {
           const campaign = response.data.data;
+          console.log('updated campaign : ', campaign);
           dispatch(userActions.updateCampaign(campaign));
         }
         dispatch(uiActions.stopLoading());
       } catch (error) {
+        console.log(error);
         dispatch(uiActions.stopLoading());
       }
     };
