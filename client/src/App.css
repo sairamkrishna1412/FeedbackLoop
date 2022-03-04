@@ -122,6 +122,22 @@
   color: #080808;
 }
 
+.background-blue {
+  background-color: #d8e4ff;
+}
+
+.text-16 {
+  font-size: 16px;
+}
+
+.text-18 {
+  font-size: 18px;
+}
+
+.text-primary {
+  color: #333;
+}
+
 @keyframes linkcolor {
   to {
     background: #3071fd;
@@ -153,13 +169,12 @@
     font-weight: 300;
   }
 }
-@media screen and (max-width: 480px) 
-{
-   .logo{
-     font-size: 2.6rem;
-     font-weight: 350;
-   }
-   .btn {
+@media screen and (max-width: 480px) {
+  .logo {
+    font-size: 2.6rem;
+    font-weight: 350;
+  }
+  .btn {
     padding: 1.1rem 4.1rem;
     border-radius: 3rem;
     border: 1px solid #000000;
@@ -168,7 +183,7 @@
     font-weight: 300;
     display: inline-block;
     cursor: pointer;
-    margin-right:  auto;
+    margin-right: auto;
   }
   .subHeading {
     font-size: 2.3rem;
@@ -176,7 +191,7 @@
     color: #191919;
     margin-bottom: 55px;
   }
-  .container{
+  .container {
     width: 90%;
   }
 }

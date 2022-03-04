@@ -1,6 +1,6 @@
 .camps {
   /* min-height: 250px; */
-  padding: 2rem 0;
+  margin: 1rem 0;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -9,35 +9,46 @@
 
 .campsRow {
   width: 90%;
-  margin: 1.5rem auto;
+  margin: 1rem auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 
 .campsRow span {
   display: inline-block;
-  width: 32%;
+  width: 24%;
   text-align: center;
-  font-size: 2rem;
+  /* font-size: 2rem; */
 }
 
+/* .campsRow span:nth-of-type(3) {
+  background-color: aliceblue;
+} */
+
 .campItem {
-  background-color: cornflowerblue;
   border-radius: 10px;
+  border: 1px solid;
   height: 100px;
-  display: flex;
-  align-items: center;
+  transition: all 0.3s;
+  /* display: flex;
+  align-items: center; */
+}
+
+.campItem:hover {
+  transform: translate(0, -3px);
+  background-color: #a5c1ff;
 }
 
 .heading {
   font-size: 2.4rem;
   font-weight: 400;
 }
-@media screen and (min-device-width: 480px) 
-{
+@media screen and (max-device-width: 480px) {
   .campsRow span {
     display: inline-block;
     width: 32%;
     text-align: center;
     font-size: 2rem;
   }
-  
 }

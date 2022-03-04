@@ -2,7 +2,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.isAuth = catchAsync(async (req, res, next) => {
-  console.log('ran 1');
+  // console.log('ran 1');
   if (req.isAuthenticated()) {
     return next();
   }

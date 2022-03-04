@@ -21,11 +21,12 @@ const NewCampaignPreviewLaunch = (props) => {
   const campaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
-
+  console.log(campaign);
   let recipients = '';
   useEffect(() => {
     // console.log('fired');
     if (!campaign || !campaign.hasOwnProperty('campaignEmails')) {
+      console.log('calling');
       dispatch(userThunks.getCampaign(id));
     }
   }, [dispatch, id, campaign]);

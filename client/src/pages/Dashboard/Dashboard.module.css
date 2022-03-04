@@ -10,11 +10,12 @@
 
 .quickSummary {
   /* width: 90%; */
-  min-height: 200px;
+  min-height: 160px;
   border-radius: 10px;
   background-color: #d8e4ff;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 2rem;
   align-items: center;
 }
 

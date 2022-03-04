@@ -36,9 +36,10 @@ const userSlice = createSlice({
       const reqCampIndex = state.campaigns.findIndex(
         (el) => el._id === campaign._id
       );
-      console.log(reqCampIndex);
+      // console.log(reqCampIndex);
       if (reqCampIndex !== -1) {
         state.campaigns[reqCampIndex] = campaign;
+        // console.log(state.campaigns[reqCampIndex]);
       } else {
         state.campaigns.push(campaign);
       }
