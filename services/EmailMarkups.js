@@ -519,7 +519,7 @@ exports.getCampaignMarkup = (opts) => `<html>
                                 class="div-6"
                               >
                               <!-- continue here -->
-                                <form action="http://localhost:3000/api/campaign/response" method="post">
+                                <form action="https://feedbackloop-dev.herokuapp.com/api/campaign/response" method="post">
                                   ${opts.questionsMarkup}
                                   <input type="hidden" name="campaign_id" value="${opts.campaign.campaignId}"/>
                                   <input type="hidden" name="email" value="{%EMAIL%}"/>
