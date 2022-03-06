@@ -1,6 +1,4 @@
-// const mongoose = require('mongoose');
 const validator = require('validator');
-// const  = require('../models/userModel');
 const Campaign = require('../models/campaignModel');
 const Question = require('../models/questionModel');
 const CampaignEmail = require('../models/campaignEmailModel');
@@ -9,7 +7,8 @@ const Feedback = require('../models/feedbackModel');
 const sendMail = require('../services/nodemailer');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const dummyEmail = require('../services/dummyEmail');
+const createForm = require('../services/createForm');
+const Cipher = require('../services/Cipher');
 
 exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
   const reqCampaign = await Campaign.findById(req.params.id).lean();
@@ -19,6 +18,7 @@ exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
       new AppError(400, 'No campaign with that id exists in your campaigns')
     );
   }
+
   req.checkedCampaign = reqCampaign;
   next();
 });
@@ -27,26 +27,31 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
   const user = req.user;
   req.body.user = user.id;
   let doc;
-  // check users existing campaigns and see if campaign name is unique to user acc.
+
+  /* check users existing campaigns and see if campaign name is unique to user acc. */
   const userCampaings = await Campaign.find({ id: user.id });
 
-  //this check is for updating campaign base
+  /* this check is for updating campaign base */
   if (req.body.hasOwnProperty('_id')) {
     const existingInd = userCampaings.findIndex(
       (camp) => String(camp._id) === req.body._id
     );
+
     if (existingInd === -1) {
       return next(new AppError(400, 'No campaign with that id found!'));
     }
+
     doc = await Campaign.findByIdAndUpdate(req.body._id, req.body, {
       new: true,
     }).populate('campaignQuestions');
   }
+
   // this is for creating new campapign
   else {
     const existingCampaignWithSameName = userCampaings.findIndex(
       (camp) => camp.campaignName == req.body.campaignName
     );
+
     if (existingCampaignWithSameName !== -1) {
       // console.log('this is existing campaign', existingCampaign);
       return next(
@@ -56,6 +61,7 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
         )
       );
     }
+
     doc = await Campaign.create(req.body);
   }
 
@@ -71,6 +77,10 @@ checkCampaignOwnerWithID = async (campaign_id, user_id) => {
       .populate('campaignQuestions')
       .lean();
 
+    campaign.campaignQuestions = campaign.campaignQuestions.sort(
+      (a, b) => a.index - b.index
+    );
+
     // console.log(campaign);
     if (!campaign || String(campaign.user) !== user_id) {
       throw new AppError(400, 'There is no such campaign in your campaigns');
@@ -80,6 +90,21 @@ checkCampaignOwnerWithID = async (campaign_id, user_id) => {
     throw error;
   }
 };
+
+exports.checkUserFeedback = catchAsync(async (req, res, next) => {
+  const { campaign_id: campaign, email } = req.body;
+  const user = await CampaignEmail.findOne({ campaign, email });
+  if (!user) {
+    return next(new AppError(400, 'Feedback still pending. please try again!'));
+  }
+  if (!user.sent) {
+    return next(new AppError(400, 'Feedback still pending. please try again!'));
+  }
+  return res.status(200).json({
+    success: true,
+    message: '',
+  });
+});
 
 exports.campaignEmails = catchAsync(async (req, res, next) => {
   //check emails
@@ -92,10 +117,9 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
 
   req.body.campaignEmails.forEach((email) => {
     if (!validator.isEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: `${email} is not an email. please make changes.`,
-      });
+      return next(
+        new AppError(400, `${email} is not an email. please make changes.`)
+      );
     }
     dbEmails.push({ campaign, email, sent: false });
   });
@@ -109,9 +133,11 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
 
   // total valid emails
   const recipientCount = dbEmails.length;
+
   //insert emails
   const docs = await CampaignEmail.insertMany(dbEmails);
   curCampaign.campaignEmails = docs;
+
   //update campaign recipients property
   await Campaign.findByIdAndUpdate(campaign, { recipientCount });
 
@@ -137,11 +163,11 @@ exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
   const dbEmails = [];
   req.body.campaignEmails.forEach((email) => {
     if (!validator.isEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: `${email} is not an email. please make changes.`,
-      });
+      return next(
+        new AppError(400, `${email} is not an email. please make changes.`)
+      );
     }
+
     if (!emailsArr.includes(email)) {
       dbEmails.push({ campaign, email, sent: false });
       recipientCount++;
@@ -149,14 +175,12 @@ exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
   });
 
   if (!dbEmails.length) {
-    return res.status(400).json({
-      success: false,
-      message: 'Emails already exist in campaign',
-    });
+    return next(new AppError(400, 'Emails already exist in campaign'));
   }
 
   //insert emails
   const docs = await CampaignEmail.insertMany(dbEmails);
+
   //update campaign recipients property
   await Campaign.findByIdAndUpdate(campaign, { recipientCount });
 
@@ -171,13 +195,14 @@ exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
 
 exports.campaignQuestions = catchAsync(async (req, res, next) => {
   const body = req.body;
+
   //get campaign_id to which question belongs to.
   const campaign = await Campaign.findById(body.campaign_id);
+
   if (!campaign) {
-    return res.status(400).json({
-      success: false,
-      message: `Campaign with id : ${body.campaign_id} doesn't exist.`,
-    });
+    return next(
+      new AppError(400, `Campaign with id : ${body.campaign_id} doesn't exist.`)
+    );
   }
 
   if (campaign.launchedAt || campaign.respondedRecipientCount > 0) {
@@ -204,10 +229,12 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       )
     );
   }
+  // console.log(bodyQuestions);
 
   // create new question doc for each question after successful validation.
   const orderedBodyQuestions = bodyQuestions.sort((a, b) => a.index - b.index);
   // console.log(orderedBodyQuestions);
+
   const improperIndexItem = orderedBodyQuestions.find((el, index) => {
     if (el.index !== index) {
       return true;
@@ -234,29 +261,24 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     if (hasChoices) {
       let errorMessage;
       if (
-        (feedbackType === 'range' || feedbackType === 'date') &&
+        feedbackType === 'range' &&
         (!question.choices.length || question.choices.length !== 3)
       ) {
-        errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & ${
-          'step of the range' ? feedbackType === 'range' : 'default date'
-        })`;
+        errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & step of the range)`;
       }
+
       if (feedbackType === 'date') {
         const start = new Date(question.choices[0]);
         const stop = new Date(question.choices[1]);
-        const defaultVal = new Date(
-          question.choices[2] ? question.choices[2] : question.choices[0]
-        );
         if (start > stop) {
           errorMessage = `Question is of type : ${feedbackType}. Start date is before Stop date. Please make changes`;
         }
-        if (defaultVal < start || defaultVal > stop) {
-          errorMessage = `Question is of type : ${feedbackType}. Default value should lie between ${start} and ${stop}`;
-        }
       }
+
       if (!question.choices.length) {
         errorMessage = `Question is of type : ${feedbackType} but no choices are given.`;
       }
+
       if (errorMessage) {
         return res.status(400).json({
           success: false,
@@ -270,40 +292,55 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       const existingQuestionInd = shouldBeDeletedQuestions.findIndex(
         (el) => String(el._id) === question._id
       );
+
       if (existingQuestionInd !== -1) {
         const updateId = shouldBeDeletedQuestions[existingQuestionInd]._id;
-        await Question.findByIdAndUpdate(updateId, { ...question });
+        if (question.hasOwnProperty('isUpdated') && question.isUpdated) {
+          await Question.findByIdAndUpdate(updateId, {
+            ...question,
+          });
+        }
         shouldBeDeletedQuestions.splice(existingQuestionInd, 1);
       }
     } else {
-      console.log('creating question');
+      // console.log('creating question');
       const questionDoc = await Question.create({
         ...question,
       });
       campaignQuestions.push(String(questionDoc.id));
     }
   }
+
   // console.log(campaignQuestions);
   // console.log(shouldBeDeletedQuestions);
+
   for (let question of shouldBeDeletedQuestions) {
     await Question.findByIdAndDelete(question);
     const questionIndex = campaignQuestions.findIndex(
       (el) => String(el) === String(question)
     );
-    console.log(question, ' ', questionIndex);
+
+    // console.log(question, ' ', questionIndex);
     if (questionIndex !== -1) {
       campaignQuestions.splice(questionIndex, 1);
     }
   }
+
   // console.log(campaignQuestions);
+
   // update campaign questions property of campaign.
   campaign.campaignQuestions = campaignQuestions;
   await campaign.save();
+
   const updatedCampaign = await Campaign.populate(campaign, {
     path: 'campaignQuestions',
   });
+  updatedCampaign.toObject();
 
-  // console.log(updatedCampaign);
+  updatedCampaign.campaignQuestions = updatedCampaign.campaignQuestions.sort(
+    (a, b) => a.index - b.index
+  );
+  // console.log(updatedCampaign.campaignQuestions);
 
   res.status(200).json({
     success: true,
@@ -317,6 +354,10 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
     .populate('campaignQuestions')
     .lean();
 
+  reqCampaign.campaignQuestions = reqCampaign.campaignQuestions.sort(
+    (a, b) => a.index - b.index
+  );
+
   if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
     return next(
       new AppError(400, 'No campaign with that id exists in your campaigns')
@@ -326,7 +367,6 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
   const campaignEmails = await CampaignEmail.find({
     campaign: req.params.id,
   }).select('email sent');
-
   reqCampaign.campaignEmails = campaignEmails;
 
   return res.status(200).json({
@@ -362,7 +402,12 @@ exports.updateCampaign = catchAsync(async (req, res, next) => {
       campaign.campaignEmails.push({ email, sent: false });
     });
   }
-  //delete un-updatable fields in campaign for now. (so these are the fields that cannot be directly updated as they delete the existing emails and questions in the campaign)
+
+  /*  
+    delete un-updatable fields in campaign for now. 
+    (so these are the fields that cannot be directly updated as 
+    they delete the existing emails and questions in the campaign) 
+  */
   const discardProps = ['campaignEmails', 'campaignQuestions'];
   discardProps.forEach((el) => {
     if (body.hasOwnProperty(el)) {
@@ -391,14 +436,22 @@ exports.updateCampaign = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteCampaign = catchAsync(async (req, res, next) => {
-  // we need to delete feedbacks, responses, [respondedRecipientCount, lastFeedback] in campaign, [sent] in campaign emails, campaign doc;
+  /* 
+    we need to delete feedbacks, responses, 
+    [respondedRecipientCount, lastFeedback] in campaign,
+    [sent] in campaign emails, campaign doc;
+  */
   const campaign = req.checkedCampaign;
   campaign.campaignQuestions.forEach(async (id) => {
     await Question.findByIdAndDelete(id);
   });
+
   await CampaignEmail.deleteMany({ campaign: campaign._id });
+
   await Feedback.deleteMany({ campaign: campaign._id });
+
   await Response.deleteMany({ campaign: campaign._id });
+
   await Campaign.findByIdAndDelete(campaign._id);
 
   res.status(204).json({
@@ -408,18 +461,27 @@ exports.deleteCampaign = catchAsync(async (req, res, next) => {
 });
 
 exports.clearResponses = catchAsync(async (req, res, next) => {
-  // we need to delete feedbacks, responses, [respondedRecipientCount, lastFeedback] in campaign, [sent] in campaign emails;
+  /* 
+    we need to delete feedbacks, responses,
+    [respondedRecipientCount, lastFeedback] 
+    in campaign, [sent] in campaign emails; 
+  */
   const campaign = req.checkedCampaign;
+
   await Feedback.deleteMany({ campaign: campaign._id });
+
   await Response.deleteMany({ campaign: campaign._id });
+
   await Campaign.findByIdAndUpdate(campaign._id, {
     respondedRecipientCount: 0,
     lastFeedback: null,
   });
+
   await CampaignEmail.updateMany(
     { campaign: campaign._id },
     { $set: { sent: false } }
   );
+
   res.status(204).json({
     success: true,
     message: `Campaign : ${campaign.campaignName}'s data is deleted successfully.'`,
@@ -427,14 +489,20 @@ exports.clearResponses = catchAsync(async (req, res, next) => {
 });
 
 exports.launchCampaign = catchAsync(async (req, res, next) => {
-  //get campaign
+  /* get campaign */
   const { campaign_id } = req.body;
   // console.log(campaign_id);
-  // here unable to get correct campaign if findOne({id : campaign_id}) is used, for me waddup campaign is returned irrespective of campaign_id in req.body;
+
+  /* 
+    here unable to get correct campaign if findOne({id : campaign_id})
+    is used, for me waddup campaign is returned irrespective of 
+    campaign_id in req.body; 
+  */
   const campaign = await Campaign.findById(campaign_id).populate(
     'campaignQuestions'
   );
   // console.log(campaign);
+
   if (!campaign) {
     return next(new AppError(400, 'Campaign not found.'));
   }
@@ -448,176 +516,283 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
     campaign: campaign_id,
     sent: false,
   }).select('email');
-
   // console.log(emails);
+
   const emailsArr = emails.map((emailObj) => emailObj.email);
-
-  const from = `${req.user.email}`;
-  const to = emailsArr;
-  const subject = campaign.emailSubject;
-  // const html = `<p>${campaign.emailContent}</p>`;
-  const html = `${dummyEmail}`;
-
-  const mailSent = await sendMail(from, to, subject, html);
-  if (!mailSent) {
-    return next(new AppError(500, 'Something went wrong'));
+  if (emailsArr.length === 0) {
+    return next(new AppError(400, 'No emails found'));
   }
 
+  const from = `${req.user.email}`;
+  // const to = emailsArr;
+  const subject = campaign.emailSubject;
+  const html = createForm.createForm(campaign);
+  const unSentEmails = [];
+  let to, mailSent, userHtml;
+
+  for (let i = 0; i < emailsArr.length; i++) {
+    to = emailsArr[i];
+    userHtml = html.replace('{%EMAIL%}', to);
+    mailSent = await sendMail(from, to, subject, userHtml);
+
+    if (!mailSent) {
+      unSentEmails.push(to);
+    }
+  }
+
+  // this either means error sending mails or means all emails have sent their response (see line 473-476)
+  if (unSentEmails.length === emailsArr.length) {
+    return next(
+      new AppError(
+        500,
+        'Could not send mails, something went wrong. please try again.'
+      )
+    );
+  }
+
+  campaign.recipientCount = emailsArr.length - unSentEmails.length;
   campaign.launchedAt = Date.now();
   await campaign.save();
-  console.log(campaign);
-  //send nodemail emails
+  // console.log(campaign);
+
   res.status(200).json({
     success: true,
-    data: campaign.launchedAt,
+    data: { launchedAt: campaign.launchedAt, unSentEmails },
     message: 'Mails were succesfully sent.',
   });
 });
 
-exports.response = catchAsync(async (req, res) => {
-  //get campaign mails
-  const { body } = req;
-  const campaignEmails = await CampaignEmail.find({
-    campaign: body.campaign_id,
-  });
+const encodeQueryStr = (campaign, email, success, message) => {
+  const queryStr = `?campaign=${campaign}&email=${email}&success=${success}&message=${message}`;
+  return Cipher.encrypt(queryStr);
+};
 
-  //check if user trying to submit form exists in the campaign mails
-  const feedbackUser = campaignEmails.find((el) => el.email === body.email);
+exports.decodeQuery = (req, res, next) => {
+  try {
+    const { cipher } = req.body;
+    const str = Cipher.decrypt(cipher);
 
-  if (!feedbackUser) {
-    return res.status(400).json({
+    return res.status(200).json({
+      success: true,
+      data: str,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
       success: false,
-      message: 'This mail is not eligible for feedback!',
+      message: 'Something went wrong.',
     });
   }
+};
 
-  //check if or not this is users first submission (if not send message stating response for this mail already recorded)
-  if (feedbackUser.sent) {
-    return res.status(400).json({
-      success: false,
-      message: 'Feedback from this mail is already received!',
+exports.response = async (req, res) => {
+  try {
+    //get campaign mails
+    const { body } = req;
+    const campaign_id = body.campaign_id;
+    const email = body.email;
+
+    let message;
+    let queryStr;
+    // console.log('received!!!');
+    // console.log(body);
+
+    const campaignEmails = await CampaignEmail.find({
+      campaign: body.campaign_id,
     });
-  }
 
-  //get campaign and questions
-  const campaign = await Campaign.findById(body.campaign_id).populate(
-    'campaignQuestions'
-  );
-  const questions = campaign.campaignQuestions;
-
-  const responses = [];
-
-  // store answer for each question
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    const { type } = question;
-    if (body.hasOwnProperty(question.id)) {
-      // make checks for questions with choices
-      const answer = [];
-      if (
-        type == 'checkbox' ||
-        type == 'range' ||
-        type == 'radio' ||
-        type == 'date'
-      ) {
-        let questionResponse = body[question.id];
-        if (type === 'range') {
-          questionResponse = parseInt(questionResponse);
-          if (
-            questionResponse < question.choices[0] ||
-            questionResponse > question.choices[1]
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
-            });
-          }
-
-          answer.push(String(questionResponse));
-        } else if (type == 'radio') {
-          if (!question.choices.find((el) => el === questionResponse)) {
-            return res.status(400).json({
-              success: false,
-              message: `Answer for question : ${question.question} is invalid. Choose from ${question.choices}`,
-            });
-          }
-          if (questionResponse.split().length > 1) {
-            return res.status(400).json({
-              success: false,
-              message: `Question : ${question.question} is of type radio. Select one option only`,
-            });
-          }
-
-          answer.push(String(questionResponse));
-        } else if (type == 'checkbox') {
-          questionResponse.forEach((el) => {
-            el = String(el);
-            if (question.choices.includes(el)) {
-              answer.push(el);
-            }
-          });
-        } else {
-          // this is for type == date
-          if (
-            questionResponse < question.choices[0] ||
-            questionResponse > question.choices[1]
-          ) {
-            return res.status(400).json({
-              success: false,
-              message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
-            });
-          }
-
-          answer.push(String(questionResponse));
-        }
-      } else {
-        answer.push(String(body[question.id]));
-      }
-      // console.log(i);
-      // create response for each question
-      const response = await Response.create({
-        answer,
-        campaign: body.campaign_id,
-        question: question.id,
-      });
-      responses.push(String(response.id));
-    } else if (question.required) {
-      return res.status(400).json({
-        success: false,
-        message: `${question.question} is a required question`,
-      });
+    /* check if user trying to submit form exists in the campaign mails */
+    const feedbackUser = campaignEmails.find((el) => el.email === body.email);
+    if (!feedbackUser) {
+      // return res.status(400).json({
+      //   success: false,
+      //   message: 'This mail is not eligible for feedback!',
+      // });
+      message = `Feedback from this mail not yet received`;
+      queryStr = encodeQueryStr(campaign_id, email, false, message);
+      return res.redirect(`/campaign/response/${queryStr}`);
     }
+
+    /* check if or not this is users first submission (if not send message stating response for this mail already recorded) */
+    if (feedbackUser.sent) {
+      // res.status(400).json({
+      //   success: false,
+      //   message: 'Feedback from this mail is already received!',
+      // });
+      message = `Feedback from this mail is already received.\nThank you!`;
+      queryStr = encodeQueryStr(campaign_id, email, true, message);
+      return res.redirect(`/campaign/response/${queryStr}`);
+    }
+
+    /* get campaign and questions */
+    const campaign = await Campaign.findById(body.campaign_id).populate(
+      'campaignQuestions'
+    );
+    const questions = campaign.campaignQuestions;
+
+    /* store answer for each question */
+    const responses = [];
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      const { type } = question;
+
+      if (body.hasOwnProperty(question.id) && body[question.id] !== '') {
+        /* make checks for questions with choices */
+        const answer = [];
+
+        if (
+          type == 'checkbox' ||
+          type == 'range' ||
+          type == 'radio' ||
+          type == 'date'
+        ) {
+          let questionResponse = body[question.id];
+
+          // range
+          if (type === 'range') {
+            questionResponse = parseInt(questionResponse);
+
+            if (
+              questionResponse < question.choices[0] ||
+              questionResponse > question.choices[1]
+            ) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`,
+              // });
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+            answer.push(String(questionResponse));
+          }
+
+          // radio
+          else if (type == 'radio') {
+            if (!question.choices.find((el) => el === questionResponse)) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is invalid. Choose from ${question.choices}`,
+              // });
+              message = `Answer for question : "${question.question}" is invalid. Choose from ${question.choices}`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            if (questionResponse.split().length > 1) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Question : ${question.question} is of type radio. Select one option only`,
+              // });
+              message = `Question : "${question.question}" is of type radio. Select one option only`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            answer.push(String(questionResponse));
+          }
+
+          // checkbox
+          else if (type == 'checkbox') {
+            if (
+              typeof questionResponse === 'string' ||
+              questionResponse instanceof String
+            ) {
+              questionResponse = [questionResponse];
+            }
+
+            questionResponse.forEach((el) => {
+              el = String(el);
+              if (question.choices.includes(el)) {
+                answer.push(el);
+              }
+            });
+          }
+
+          // date
+          else {
+            if (
+              questionResponse < question.choices[0] ||
+              questionResponse > question.choices[1]
+            ) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
+              // });
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            answer.push(String(questionResponse));
+          }
+        } else {
+          answer.push(String(body[question.id]));
+        }
+
+        // create response for each question
+        const response = await Response.create({
+          answer,
+          campaign: body.campaign_id,
+          question: question.id,
+        });
+        responses.push(String(response.id));
+      } else if (question.required) {
+        // return res.status(400).json({
+        //   success: false,
+        //   message: `${question.question} is a required question`,
+        // });
+        message = `Question : "${question.question}" is a required question`;
+        queryStr = encodeQueryStr(campaign_id, email, false, message);
+        return res.redirect(`/campaign/response/${queryStr}`);
+      }
+    }
+
+    /* 
+      create a feedback doc to store all responses of questions. One whole 
+      form will have 1 feedback doc and "n" responses for "n" quesitons in form.
+    */
+    const feedback = await Feedback.create({
+      email: body.email,
+      campaign: String(body.campaign_id),
+      responses,
+    });
+
+    /* update sent prop of campaignEmail doc */
+    await CampaignEmail.updateOne(
+      { email: body.email, campaign: body.campaign_id },
+      { sent: true }
+    );
+
+    /* increase responded recipientCount; */
+    campaign.respondedRecipientCount += 1;
+    campaign.lastFeedback = new Date();
+    await campaign.save();
+
+    // res.status(200).json({
+    //   success: true,
+    //   data: feedback,
+    //   message: 'Thank you, your feedback is valuable for us!',
+    // });
+    message = `Thank You for your valuable feedback!`;
+    queryStr = encodeQueryStr(campaign_id, email, true, message);
+    return res.redirect(`/campaign/response/${queryStr}`);
+
+    // res.redirect(
+    //   `/campaign/response?email=${email}&campaign=${body.campaign_id}&success=true`
+    // );
+    // you can run others here
+    //on the request body we will need (campaign_id, <foreach question we will need question_id>, email_id)
+  } catch (error) {
+    console.log(error);
+    const message = `?message=Sorry, Something went wrong.`;
+    const queryStr = Cipher.encrypt(message);
+    return res.redirect(`/campaign/response/${queryStr}`);
   }
-
-  // create a feedback doc to store all responses of questions. One whole form will have 1 feedback doc and "n" responses for "n" quesitons in form.
-  const feedback = await Feedback.create({
-    email: body.email,
-    campaign: String(body.campaign_id),
-    responses,
-  });
-
-  // update sent prop of campaignEmail doc
-  await CampaignEmail.updateOne(
-    { email: body.email, campaign: body.campaign_id },
-    { sent: true }
-  );
-
-  // increase responded recipientCount;
-  campaign.respondedRecipientCount += 1;
-  campaign.lastFeedback = new Date();
-  await campaign.save();
-
-  res.status(200).json({
-    success: true,
-    data: feedback,
-    message: 'Thank you, your feedback is valuable for us!',
-  });
-  // you can run others here
-  //on the request body we will need (campaign_id, <foreach question we will need question_id>, email_id)
-});
+};
 
 exports.getResponses = catchAsync(async (req, res) => {
-  // get responses of that campaign
+  /* get responses of that campaign */
   const responses = await Response.find({ campaign: req.params.id });
   const results = responses.length ? responses.length : 0;
   res.status(200).json({
@@ -627,20 +802,28 @@ exports.getResponses = catchAsync(async (req, res) => {
   });
 });
 
-exports.getSummary = catchAsync(async (req, res) => {
-  // get campaign
+exports.getSummary = catchAsync(async (req, res, next) => {
+  /* get campaign */
   const campaign = await Campaign.findById(req.params.id)
     .populate('campaignQuestions')
     .lean();
 
-  // get reponses for that campaign
+  if (
+    !campaign.launchedAt ||
+    campaign.respondedRecipientCount === 0 ||
+    campaign.recipientCount === 0
+  ) {
+    return next(new AppError(400, 'No responses for this campaign.'));
+  }
+
+  /* get reponses for that campaign */
   const campaignResponses = await Response.find({
     campaign: req.params.id,
   }).lean();
   campaign.responses = campaignResponses;
   const questionCount = campaign.campaignQuestions.length;
 
-  //generate summary
+  /* generate summary */
   // let start = Date.now();
   const summaryObj = {};
   for (let i = 0; i < questionCount; i++) {
@@ -661,13 +844,13 @@ exports.getSummary = catchAsync(async (req, res) => {
 });
 
 const calcSummary = (question, responses) => {
-  //takes a question and its corresponding responses to generate summary for it
+  /* takes a question and its corresponding responses to generate summary for it */
   const summary = { ...question };
   delete summary._id;
   delete summary.__v;
   stats = {};
 
-  // for type = number
+  /* for type = number */
   if (question.type === 'number') {
     let max = (min = parseInt(responses[0].answer));
     let sum = 0,
@@ -696,17 +879,14 @@ const calcSummary = (question, responses) => {
     stats.average = sum / responses.length;
 
     let valCountKeys = Object.keys(valCounts);
-
     valCountKeys.sort((a, b) => {
       return valCounts[a] - valCounts[b];
     });
 
     stats.valCountOrdered = valCountKeys;
     stats.valCounts = valCounts;
-  }
-
-  // for type = range, checkbox, radio
-  else if (
+  } else if (
+    /* for type = range, checkbox, radio */
     question.type === 'range' ||
     question.type === 'checkbox' ||
     question.type === 'radio'
@@ -716,21 +896,21 @@ const calcSummary = (question, responses) => {
       const answers = responses[i].answer;
       responsesArr = responsesArr.concat(answers);
     }
+
     const valCountsAndOrder = calcValCountsAndOrder(
       responsesArr,
       responses.length
     );
     stats.valCounts = valCountsAndOrder[0];
     stats.valCountOrdered = valCountsAndOrder[1];
-  }
-
-  // for type = date
-  else if (question.type === 'date') {
+  } else if (question.type === 'date') {
+    /* for type = date */
     const daysGap =
       (new Date(question.choices[1]).getTime() -
         new Date(question.choices[0]).getTime()) /
       (1000 * 60 * 60 * 24);
-    //we will calculate for max days gap of 370 days
+
+    /* we will calculate for max days gap of 370 days */
     if (daysGap < 370) {
       let responsesArr = [];
       for (let i = 0; i < responses.length; i++) {
@@ -766,6 +946,7 @@ const calcSummary = (question, responses) => {
         }
       });
     }
+
     let valCountKeys = Object.keys(valCounts);
     valCountKeys.sort((a, b) => {
       return valCounts[a] - valCounts[b];
@@ -787,11 +968,12 @@ const calcValCountsAndOrder = (responsesArr, responesCount = 0) => {
       valCounts[val] += 1;
     }
   }
-  let valCountKeys = Object.keys(valCounts);
 
+  let valCountKeys = Object.keys(valCounts);
   valCountKeys.sort((a, b) => {
     return valCounts[a] - valCounts[b];
   });
+
   return [valCounts, valCountKeys];
 };
 

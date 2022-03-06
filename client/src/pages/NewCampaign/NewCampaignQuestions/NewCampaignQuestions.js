@@ -38,6 +38,7 @@ const NewCampaignQuestions = (props) => {
   ) {
     campaignQuestions = [...campaign.campaignQuestions];
     campaignQuestions.sort((a, b) => a.index - b.index);
+    // console.log('after sorting : ', campaignQuestions);
   }
 
   if (!campaignQuestions) {
@@ -67,10 +68,18 @@ const NewCampaignQuestions = (props) => {
   const changeQuestion = (updatedQuestion) => {
     const { index } = updatedQuestion;
     const newQuestions = questions.map((question, ind) => {
+      // for each question if updated question index not equal to current question iteration, then we just return the question without any change
       if (ind !== index) {
         return question;
       } else {
-        return updatedQuestion;
+        // here map iteration question ind == updated question index, so this here we need to return updated question
+        if (
+          updatedQuestion.hasOwnProperty('isUpdated') &&
+          updatedQuestion.isUpdated
+        ) {
+          return updatedQuestion;
+        }
+        return { ...updatedQuestion, isUpdated: true };
       }
     });
 
@@ -82,7 +91,12 @@ const NewCampaignQuestions = (props) => {
     // const newQuestions = [...questions];
     const newQuestions = JSON.parse(JSON.stringify(questions));
     const movingQuestion = newQuestions[curInd];
+    // if (movingQuestion.index === newQuestions[desInd].index) {
+
+    // }
+
     const n = newQuestions.length;
+    let current;
     if (desInd > n - 1) {
       desInd = n - 1;
     } else if (desInd < 0) {
@@ -91,18 +105,21 @@ const NewCampaignQuestions = (props) => {
 
     if (desInd < curInd) {
       for (let i = curInd - 1; i >= desInd; i--) {
-        const current = newQuestions[i];
+        current = newQuestions[i];
         current.index += 1;
+        current.isUpdated = true;
         newQuestions[i + 1] = current;
       }
     } else {
       for (let i = curInd + 1; i <= desInd; i++) {
-        const current = newQuestions[i];
+        current = newQuestions[i];
         current.index -= 1;
+        current.isUpdated = true;
         newQuestions[i - 1] = current;
       }
     }
     movingQuestion.index = desInd;
+    movingQuestion.isUpdated = true;
     newQuestions[desInd] = movingQuestion;
 
     setQuestions(newQuestions);
@@ -141,8 +158,12 @@ const NewCampaignQuestions = (props) => {
   const formSubmitHandler = (e) => {
     e.preventDefault();
     const submitObj = makeQuestionsSubmitReady(questions);
-    dispatch(userThunks.campaignQuestions(submitObj));
-    history.push(`/newCampaign/${id}/recipients`);
+    console.log(submitObj);
+    dispatch(userThunks.campaignQuestions(submitObj))
+      .then(() => {
+        history.push(`/newCampaign/${id}/recipients`);
+      })
+      .catch((err) => console.log(err));
   };
 
   // console.log(questions);

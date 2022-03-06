@@ -7,5 +7,6 @@ module.exports = (err, req, res, next) => {
     success: false,
     status: err.status,
     message: err.message,
+    // stack: err.stack,
   });
 };

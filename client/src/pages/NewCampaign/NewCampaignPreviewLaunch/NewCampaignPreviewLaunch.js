@@ -21,11 +21,12 @@ const NewCampaignPreviewLaunch = (props) => {
   const campaign = useSelector((state) =>
     state.user.campaigns.find((el) => el._id === id)
   );
-
+  console.log(campaign);
   let recipients = '';
   useEffect(() => {
     // console.log('fired');
     if (!campaign || !campaign.hasOwnProperty('campaignEmails')) {
+      console.log('calling');
       dispatch(userThunks.getCampaign(id));
     }
   }, [dispatch, id, campaign]);
@@ -64,6 +65,7 @@ const NewCampaignPreviewLaunch = (props) => {
   let questionsArr = [];
   if (campaign && campaign.hasOwnProperty('campaignQuestions')) {
     const questions = campaign.campaignQuestions;
+    console.log('preview question : ', questions);
     questionsArr = questions.map((question, index) => {
       return (
         <PreviewQuestionItem

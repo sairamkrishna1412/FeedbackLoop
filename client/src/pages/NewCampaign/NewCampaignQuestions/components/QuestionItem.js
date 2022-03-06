@@ -76,9 +76,10 @@ const QuestionItem = (props) => {
   };
 
   const orderChangeHandler = (desiredVal) => {
-    if (values.index !== desiredVal - 1) {
-      props.onOrderChange(values.index, desiredVal - 1);
-    }
+    if (values.index)
+      if (values.index !== desiredVal - 1) {
+        props.onOrderChange(values.index, desiredVal - 1);
+      }
   };
 
   const questionDeleteHandler = () => {

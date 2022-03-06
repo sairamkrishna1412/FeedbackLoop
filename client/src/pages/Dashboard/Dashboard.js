@@ -32,9 +32,19 @@ function Dashboard() {
               title="Active Campaigns"
               value={userState.campaigns.length}
             ></SummaryItem>
-            <SummaryItem
+            {/* <SummaryItem
               title="Available Credits"
               value={authState.user ? authState.user.credits : 'N/A'}
+            ></SummaryItem> */}
+          </div>
+          <div className={`${styles.quickSummary}`}>
+            <SummaryItem
+              title="Launched Campaigns"
+              value={userState.campaigns.length}
+            ></SummaryItem>
+            <SummaryItem
+              title="Unlaunched Campaigns"
+              value={userState.campaigns.length}
             ></SummaryItem>
           </div>
         </Container>

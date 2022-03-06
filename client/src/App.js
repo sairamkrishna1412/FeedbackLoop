@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import CampaignSummary from './pages/CampaignSummary/CampaignSummary';
 import NewCampaign from './pages/NewCampaign/NewCampaign';
 import Authenticate from './components/Auth/Authenticate';
+import CampaignResponse from './pages/CampaignResponse/CampaignResponse';
 
 import './App.css';
 
@@ -45,6 +46,9 @@ function App() {
           {/* <Authenticate> */}
           <NewCampaign></NewCampaign>
           {/* </Authenticate> */}
+        </Route>
+        <Route path="/campaign/response/:query" exact>
+          <CampaignResponse></CampaignResponse>
         </Route>
         <Route path="/campaign/:id">
           <CampaignSummary></CampaignSummary>

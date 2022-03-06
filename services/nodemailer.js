@@ -36,13 +36,6 @@ const sendMail = async (from, to, subject, html) => {
   }
 };
 
-// sendMail(
-//   'sai@gmail.com',
-//   ['rabb.rabitto@gmail.com', 'narsingraodurgi@gmail.com'],
-//   'Test',
-//   '<p>what up?</p>'
-// );
-
 module.exports = sendMail;
 
 // transporter
