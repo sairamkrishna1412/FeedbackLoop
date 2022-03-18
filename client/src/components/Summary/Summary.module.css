@@ -1,0 +1,9 @@
+.whiteBlock {
+  background-color: #fff;
+  width: 90%;
+  margin: 5rem auto;
+  border-radius: 10px;
+  min-height: 20rem;
+  display: flex;
+  flex-direction: column;
+}

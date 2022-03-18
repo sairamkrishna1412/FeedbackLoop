@@ -84,6 +84,7 @@ app.get('/api/user', (req, res) => {
 });
 
 /* for all other routes we just send a dummy file */
+// VERYY VERYYY IMPORTANT FOR SERVING FILES TO FRONTEND.
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
