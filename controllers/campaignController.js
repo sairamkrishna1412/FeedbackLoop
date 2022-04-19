@@ -256,7 +256,8 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       feedbackType === 'checkbox' ||
       feedbackType === 'range' ||
       feedbackType === 'radio' ||
-      feedbackType === 'date';
+      feedbackType === 'date' ||
+      feedbackType === 'number';
 
     if (hasChoices) {
       let errorMessage;
@@ -273,6 +274,13 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
         if (start > stop) {
           errorMessage = `Question is of type : ${feedbackType}. Start date is before Stop date. Please make changes`;
         }
+      }
+
+      if (
+        feedbackType === 'number' &&
+        (!question.choices.length || question.choices.length !== 2)
+      ) {
+        errorMessage = `Question is of type : ${feedbackType}. Limits should be an array of size 2 (min & max values allowed)`;
       }
 
       if (!question.choices.length) {
@@ -644,6 +652,7 @@ exports.response = async (req, res) => {
           type == 'checkbox' ||
           type == 'range' ||
           type == 'radio' ||
+          type == 'number' ||
           type == 'date'
         ) {
           let questionResponse = body[question.id];
@@ -707,6 +716,22 @@ exports.response = async (req, res) => {
                 answer.push(el);
               }
             });
+          }
+
+          // number
+          else if (type === 'number') {
+            questionResponse = parseInt(questionResponse);
+
+            if (
+              question.choices.length === 2 &&
+              (questionResponse < question.choices[0] ||
+                questionResponse > question.choices[1])
+            ) {
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+            answer.push(String(questionResponse));
           }
 
           // date
@@ -930,8 +955,8 @@ const calcSummary = (question, responses) => {
         responsesArr,
         responses.length
       );
-      stats.valCountOrdered = valCountsAndOrder[0];
-      stats.valCounts = valCountsAndOrder[1];
+      stats.valCounts = valCountsAndOrder[0];
+      stats.valCountsOrdered = valCountsAndOrder[1];
     }
   }
 
@@ -961,7 +986,7 @@ const calcSummary = (question, responses) => {
       return valCounts[a] - valCounts[b];
     });
 
-    stats.orderValCounts = valCountKeys;
+    stats.valCountsOrdered = valCountKeys;
     stats.valCounts = valCounts;
   }
   return stats;

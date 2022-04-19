@@ -32,6 +32,7 @@ const GoogleVerifyFunction = async function (
   // console.log(profile);
   const googleID = profile.id;
   const email = profile.emails[0].value;
+  // console.log(profile);
   let existingUser = await User.findOne({ email });
 
   if (!existingUser) {

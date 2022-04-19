@@ -70,6 +70,7 @@ function CampaignSummary() {
   // first check if feedback data exists
   if (feedbackData) {
     const { summary, questionResponses, feedbacks } = feedbackData;
+    // console.log(feedbackData);
     let summaryObj, questionResponsesArr;
 
     for (let i = 0; i < campaignQuestions.length; i++) {
@@ -163,7 +164,7 @@ function CampaignSummary() {
               className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
             >
               <div className="flex items-center gap-3">
-                <span className="font-medium text-4xl">Emails sent</span>
+                <span className="font-medium text-4xl">Emails Sent</span>
                 <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
                   <FontAwesomeIcon icon={faPaperPlane}></FontAwesomeIcon>
                 </div>

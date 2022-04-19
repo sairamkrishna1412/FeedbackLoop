@@ -26,7 +26,9 @@ const QuestionSummary = (props) => {
                   {key}
                 </h5>
                 <span className="font-semibold text-[20px] text-blueGray-700 capitalize">
-                  {summary[key]}
+                  {String(summary[key]).length > 5
+                    ? summary[key].toFixed(2)
+                    : summary[key]}
                 </span>
               </div>
             </div>
