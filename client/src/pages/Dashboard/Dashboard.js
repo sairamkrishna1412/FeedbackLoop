@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import Header from '../../components/UI/Header/Header';
 // import Loader from '../../components/UI/Loader/Loader';
 import CampaignCont from '../../components/Campaign/CampaignCont/CampaignCont';
-import SummaryItem from '../../components/Summary/SummaryItem';
+import SummaryItem from '../../components/Summary/SummaryItem/SummaryItem';
 import Container from '../../components/UI/Container/Container';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -13,7 +13,7 @@ import styles from './Dashboard.module.css';
 
 function Dashboard() {
   const userState = useSelector((state) => state.user);
-  const authState = useSelector((state) => state.auth);
+  // const authState = useSelector((state) => state.auth);
   const lauchedCamps = userState.campaigns.filter((el) => el.launchedAt);
   const unLauchedCamps = userState.campaigns.filter((el) => !el.launchedAt);
   return (

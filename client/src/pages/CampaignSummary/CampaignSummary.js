@@ -4,10 +4,21 @@ import { Redirect, useParams } from 'react-router-dom';
 import Header from '../../components/UI/Header/Header';
 import Loader from '../../components/UI/Loader/Loader';
 import Container from '../../components/UI/Container/Container';
-import { useEffect } from 'react';
+import NavItem from '../../components/UI/NavItem/NavItem';
+import QuestionSummary from '../../components/Summary/QuestionSummary/QuestionSummary';
+import QuestionResponses from '../../components/Summary/QuestionResponses/QuestionResponses';
+import { useEffect, useState } from 'react';
 
 import styles from './CampaignSummary.module.css';
 import { userThunks } from '../../store/userSlice';
+import Feedback from '../../components/Summary/Feedback/Feedback';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faQuestion,
+  faPaperPlane,
+  faComment,
+  faComments,
+} from '@fortawesome/free-solid-svg-icons';
 
 function CampaignSummary() {
   const dispatch = useDispatch();
@@ -15,7 +26,9 @@ function CampaignSummary() {
   const isPageLoading = useSelector((state) => state.ui.pageLoading);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const campaign = useSelector((state) => state.user.visibleCampaign);
-  console.log(campaign);
+  const [activeItem, setActiveItem] = useState('Summary');
+  // console.log(campaign);
+  // console.log(activeItem);
 
   useEffect(() => {
     dispatch(userThunks.getCampaignSummary(id));
@@ -45,47 +58,133 @@ function CampaignSummary() {
     }
   }
 
+  const activeChangeHandler = (title) => {
+    setActiveItem(title);
+  };
+  let summariesJsx = [];
+  let questionResponsesJsx = [];
+  let feedbacksJsx = [];
+
+  const { feedbackData, campaignQuestions } = campaign;
+
+  // first check if feedback data exists
+  if (feedbackData) {
+    const { summary, questionResponses, feedbacks } = feedbackData;
+    // console.log(feedbackData);
+    let summaryObj, questionResponsesArr;
+
+    for (let i = 0; i < campaignQuestions.length; i++) {
+      const questionObj = campaignQuestions[i];
+      const id = questionObj._id;
+      summaryObj = summary.hasOwnProperty(`${id}`) ? summary[id] : {};
+
+      questionResponsesArr = questionResponses.hasOwnProperty(`${id}`)
+        ? questionResponses[id]
+        : [];
+
+      summariesJsx.push(
+        <QuestionSummary
+          key={i}
+          question={questionObj}
+          summary={summaryObj}
+        ></QuestionSummary>
+      );
+
+      questionResponsesJsx.push(
+        <QuestionResponses
+          key={i}
+          question={questionObj}
+          responses={questionResponsesArr}
+        ></QuestionResponses>
+      );
+    }
+
+    feedbacksJsx = feedbacks.map((feedback, ind) => (
+      <Feedback feedback={feedback} key={ind}></Feedback>
+    ));
+  } else {
+    summariesJsx = (
+      <p className="text-center text-3xl mt-20 bg-white py-4">
+        No Responses yet
+      </p>
+    );
+    questionResponsesJsx = (
+      <p className="text-center text-3xl mt-20 bg-white py-4">
+        No Responses yet
+      </p>
+    );
+    feedbacksJsx = (
+      <p className="text-center text-3xl mt-20 bg-white py-4">
+        No Feedbacks yet
+      </p>
+    );
+  }
+
   return (
     <div className={`container`}>
       <Header></Header>
       <div className={styles.newBlock}>
         <h2 className="subHeading">Summary</h2>
         <div className={`${styles.quickSummary}`}>
-          <div className="flex justify-around items-center md:w-11/12 mx-auto">
+          <div className="flex justify-center items-center mx-auto">
+            <div className={`text-5xl font-bold`}>
+              <h2>{campaign.campaignName}</h2>
+            </div>
+          </div>
+          <div className="flex justify-around items-center">
             <div
-              className={`${styles['summary-item']} ${styles['summary-item__big']}`}
+              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-5xl bg-slate-100`}
             >
-              <span className="font-medium">Questions</span>
-              <span>{campaign.campaignQuestions.length}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-4xl">Questions</span>
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faQuestion}></FontAwesomeIcon>
+                </div>
+              </div>
+              <span className="text-blueGray-700 font-bold">
+                {campaign.campaignQuestions.length}
+              </span>
             </div>
             <div
-              className={`${styles['summary-item']} ${styles['summary-item__small']} font-bold`}
+              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
             >
-              {campaign.campaignName}
-            </div>
-            <div
-              className={`${styles['summary-item']} ${styles['summary-item__big']}`}
-            >
-              <span className="font-medium">Last Feedback</span>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-4xl">Last Feedback</span>
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
+                </div>
+              </div>
               <span className="text-[18px]">
                 {new Date(campaign.createdAt).toLocaleString(undefined, {
                   dateStyle: 'long',
                 })}
               </span>
             </div>
-          </div>
-          <div className="flex justify-around items-center md:w-2/3 mx-auto">
             <div
-              className={`${styles['summary-item']} ${styles['summary-item__medium']}`}
+              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
             >
-              <span className="font-medium">Emails sent</span>
-              <span>{campaign.recipientCount}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-4xl">Emails Sent</span>
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faPaperPlane}></FontAwesomeIcon>
+                </div>
+              </div>
+              <span className="text-blueGray-700 font-bold text-5xl">
+                {campaign.recipientCount}
+              </span>
             </div>
             <div
-              className={`${styles['summary-item']} ${styles['summary-item__medium']}`}
+              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
             >
-              <span className="font-medium">Responses</span>
-              <span>{campaign.respondedRecipientCount}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-4xl">Responses</span>
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faComments}></FontAwesomeIcon>
+                </div>
+              </div>
+              <span className="text-blueGray-700 font-bold text-5xl">
+                {campaign.respondedRecipientCount}
+              </span>
             </div>
           </div>
         </div>
@@ -106,10 +205,29 @@ function CampaignSummary() {
       </div>
       <h2 className="subHeading">Stats</h2>
       <Container>
-        <div className={styles.blueBlock}></div>
-        <div className={styles.blueBlock}></div>
-        <div className={styles.blueBlock}></div>
-        <div className={styles.blueBlock}></div>
+        <div className=" grid grid-cols-3 text-center text-3xl">
+          <NavItem
+            title="Summary"
+            active={activeItem === 'Summary'}
+            onClickHandler={activeChangeHandler}
+          ></NavItem>
+          <NavItem
+            title="Question Responses"
+            active={activeItem === 'Question Responses'}
+            onClickHandler={activeChangeHandler}
+          ></NavItem>
+          <NavItem
+            title="Feedbacks"
+            active={activeItem === 'Feedbacks'}
+            onClickHandler={activeChangeHandler}
+          ></NavItem>
+        </div>
+        <div>{activeItem === 'Summary' && summariesJsx}</div>
+        <div>{activeItem === 'Question Responses' && questionResponsesJsx}</div>
+        <div>{activeItem === 'Feedbacks' && feedbacksJsx}</div>
+        {/* <div className={styles.whiteBlock}></div>
+        <div className={styles.whiteBlock}></div>
+        <div className={styles.whiteBlock}></div> */}
       </Container>
     </div>
   );

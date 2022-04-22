@@ -18,7 +18,7 @@ const NewCampaignRecipients = (props) => {
   const history = useHistory();
 
   const [recipients, setRecipients] = useState('');
-  const [valid, setIsValid] = useState(false);
+  const [valid, setIsValid] = useState(true);
   // console.log(recipients);
 
   const isPageLoading = useSelector((state) => state.ui.pageLoading);

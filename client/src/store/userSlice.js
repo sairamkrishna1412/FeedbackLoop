@@ -120,13 +120,25 @@ export const userThunks = {
           campaign = response.data.data;
         }
         // }
+        // if (campaign) {
+        //   const response1 = await axios.get(`/api/campaign/responses/${id}`);
+        //   if (response1.status === 200 && response1.data.success) {
+        //     campaign.responses = response1.data.data;
+        //   }
+        // }
         if (campaign) {
-          const response1 = await axios.get(`/api/campaign/responses/${id}`);
+          const response1 = await axios
+            .get(`/api/campaign/summary/${id}`)
+            .catch(() => {
+              campaign.feedbackData = null;
+              dispatch(userActions.setVisibleCampaign(campaign));
+            });
+
           if (response1.status === 200 && response1.data.success) {
-            campaign.responses = response1.data.data;
+            campaign.feedbackData = response1.data.data;
           }
         }
-
+        console.log(campaign);
         dispatch(userActions.setVisibleCampaign(campaign));
         // dispatch(userActions.updateCampaign(campaign));
 

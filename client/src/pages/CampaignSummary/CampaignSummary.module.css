@@ -4,7 +4,10 @@
 
 .quickSummary {
   /* width: 90%; */
-  min-height: 400px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
   border-radius: 10px;
   background-color: #d8e4ff;
   padding: 3rem;
@@ -24,14 +27,14 @@
 }
 
 .summary-item__big {
-  width: 20rem;
-  height: 20rem;
+  width: 17rem;
+  height: 17rem;
   background-color: #b6ccff;
 }
 
 .summary-item__small {
-  width: 15rem;
-  height: 15rem;
+  width: 13rem;
+  height: 13rem;
   background-color: #94b5ff;
   box-shadow: 0 5px 15px 0px rgba(0, 0, 0, 0.6);
   transform: translatey(0px);
@@ -42,16 +45,6 @@
   width: 17rem;
   height: 17rem;
   background-color: #b6ccff;
-}
-
-.blueBlock {
-  background-color: cornflowerblue;
-  margin: 5rem auto;
-  border-radius: 10px;
-  min-height: 20rem;
-  width: 90%;
-  display: flex;
-  flex-direction: column;
 }
 
 @keyframes float {

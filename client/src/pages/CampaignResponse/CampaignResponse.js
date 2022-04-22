@@ -57,18 +57,18 @@ const Response = (props) => {
             </p>
           </div>
           <div className="mt-20 text-[18px] font-light">
-            {params.hasOwnProperty('campaign') && params.campaign && (
+            {/* {params.hasOwnProperty('campaign') && params.campaign && (
               <div className="flex justify-center gap-4">
                 <img src={Assignment} alt="campaign" width={20} />
                 <span className="font-medium">Campaign : </span>
                 <span>New Campaign From UI</span>
               </div>
-            )}
+            )} */}
             {params.hasOwnProperty('email') && params.email && (
               <div className="flex justify-center gap-4 mt-6">
                 <img src={Person} alt="user" width={20} />
                 <span className="font-medium">User : </span>
-                <span>sairamkrishna1412@gmail.com</span>
+                <span>{params.email}</span>
               </div>
             )}
           </div>
