@@ -19,7 +19,7 @@ import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
 
 const SummaryChart = (props) => {
   const { question, summary } = props;
-  console.log(question, summary);
+  // console.log(question, summary);
   // const chartTypes = {
   //   text: 'Wordcloud',
   //   number: 'Scatter',
@@ -187,8 +187,8 @@ const SummaryChart = (props) => {
             },
           },
           x: {
-            suggestedMin: question.choices[0],
-            suggestedMax: question.choices[1],
+            suggestedMin: question?.choices[0],
+            suggestedMax: question?.choices[1],
             ticks: {
               precision: 0,
             },

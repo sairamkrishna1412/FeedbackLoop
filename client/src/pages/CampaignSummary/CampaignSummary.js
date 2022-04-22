@@ -212,13 +212,13 @@ function CampaignSummary() {
             onClickHandler={activeChangeHandler}
           ></NavItem>
           <NavItem
-            title="Feedbacks"
-            active={activeItem === 'Feedbacks'}
+            title="Question Responses"
+            active={activeItem === 'Question Responses'}
             onClickHandler={activeChangeHandler}
           ></NavItem>
           <NavItem
-            title="Question Responses"
-            active={activeItem === 'Question Responses'}
+            title="Feedbacks"
+            active={activeItem === 'Feedbacks'}
             onClickHandler={activeChangeHandler}
           ></NavItem>
         </div>

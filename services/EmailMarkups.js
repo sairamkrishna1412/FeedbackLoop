@@ -1,3 +1,5 @@
+const keys = require('../config/keys');
+
 exports.getQuestionMarkup = (question) => {
   let markup = '';
   switch (question.type) {
@@ -15,7 +17,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
         <div style="margin-top: 15px">
           <input
@@ -61,7 +67,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
         <div style="margin-top: 15px">
           <input
@@ -102,7 +112,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
           ${generateChoicesMarkup(
             String(question._id),
@@ -126,7 +140,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
           ${generateChoicesMarkup(
             String(question._id),
@@ -203,7 +221,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
         <div
         style="margin: 25px auto 20px"
@@ -273,7 +295,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
         <div style="margin-top: 15px" class="div-9">
           <input
@@ -309,7 +335,11 @@ exports.getQuestionMarkup = (question) => {
         <div
           style="font-size: 16px; line-height: 20px"
         >
-          Q${question.index + 1}. ${question.question} ${question.required ? '<span style="font-size: 18px; color: #FF0000;">*</span>' : ''}
+          Q${question.index + 1}. ${question.question} ${
+        question.required
+          ? '<span style="font-size: 18px; color: #FF0000;">*</span>'
+          : ''
+      }
         </div>
         <div style="margin-top: 15px" class="div-9">
           <input
@@ -519,7 +549,7 @@ exports.getCampaignMarkup = (opts) => `<html>
                                 class="div-6"
                               >
                               <!-- continue here -->
-                                <form action="http://localhost:3000/api/campaign/response" method="post">
+                                <form action="${keys.API_ENDPOINT}/campaign/response" method="post">
                                   ${opts.questionsMarkup}
                                   <input type="hidden" name="campaign_id" value="${opts.campaign.campaignId}"/>
                                   <input type="hidden" name="email" value="{%EMAIL%}"/>

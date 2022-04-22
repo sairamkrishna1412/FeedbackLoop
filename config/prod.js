@@ -8,4 +8,5 @@ module.exports = {
   cookieKey: process.env.COOKIE_KEY,
   sendMailEmail: process.env.SEND_MAIL_EMAIL,
   sendMailPassword: process.env.SEND_MAIL_PASSWORD,
+  API_ENDPOINT: process.env.API_ENDPOINT,
 };

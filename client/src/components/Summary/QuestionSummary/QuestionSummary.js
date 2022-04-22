@@ -1,11 +1,11 @@
 import React from 'react';
 import styles from '../Summary.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faQuestion, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { faQuestion, faHandPointer } from '@fortawesome/free-solid-svg-icons';
 import SummaryChart from '../SummaryChart/SummaryChart';
 
 const QuestionSummary = (props) => {
-  console.log(props);
+  // console.log(props);
   const { question, summary } = props;
   const summaryKeys = Object.keys(summary);
   const summaryJsx = [];
@@ -78,7 +78,8 @@ const QuestionSummary = (props) => {
                 </div>
                 <div className="relative w-auto pl-4 flex-initial">
                   <div className="text-white p-3 text-center inline-flex items-center justify-center w-16 h-16 shadow-lg rounded-full bg-blue-500">
-                    <FontAwesomeIcon icon={faPencilAlt}></FontAwesomeIcon>
+                    {/* <FontAwesomeIcon icon={faPencilAlt}></FontAwesomeIcon> */}
+                    <FontAwesomeIcon icon={faHandPointer} />
                   </div>
                 </div>
               </div>
