@@ -97,7 +97,7 @@ const NewCampaignRecipients = (props) => {
     } else {
       if (finalRecipients.length) {
         // submit
-        console.log(finalRecipients);
+        // console.log(finalRecipients);
         const submitObj = { campaign_id: id, campaignEmails: finalRecipients };
         dispatch(userThunks.campaignEmails(submitObj));
         setRecipients('');

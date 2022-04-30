@@ -5,12 +5,12 @@ const User = require('../models/userModel');
 const keys = require('../config/keys');
 
 passport.serializeUser((user, done) => {
-  console.log('serialize ran', user);
+  // console.log('serialize ran', user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  console.log('de-serialize ran', id);
+  // console.log('de-serialize ran', id);
   const user = await User.findById(id);
   done(null, user);
 });

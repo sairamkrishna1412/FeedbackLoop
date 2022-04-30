@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 
 import styles from './CampaignSummary.module.css';
 import { userThunks } from '../../store/userSlice';
-import Feedback from '../../components/Summary/Feedback/Feedback';
+import Feedbacks from '../../components/Summary/Feedbacks/Feedbacks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faQuestion,
@@ -99,9 +99,12 @@ function CampaignSummary() {
       );
     }
 
-    feedbacksJsx = feedbacks.map((feedback, ind) => (
-      <Feedback feedback={feedback} key={ind}></Feedback>
-    ));
+    feedbacksJsx = (
+      <Feedbacks
+        feedbacks={feedbacks}
+        questions={campaignQuestions}
+      ></Feedbacks>
+    );
   } else {
     summariesJsx = (
       <p className="text-center text-3xl mt-20 bg-white py-4">

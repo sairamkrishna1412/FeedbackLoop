@@ -34,7 +34,7 @@ const Response = (props) => {
     let item = fullParams[i].split('=');
     params[item[0]] = item[1];
   }
-  console.log(params);
+  // console.log(params);
 
   if (isPageLoading) {
     return <Loader></Loader>;

@@ -138,7 +138,7 @@ export const userThunks = {
             campaign.feedbackData = response1.data.data;
           }
         }
-        console.log(campaign);
+        // console.log(campaign);
         dispatch(userActions.setVisibleCampaign(campaign));
         // dispatch(userActions.updateCampaign(campaign));
 
@@ -164,7 +164,7 @@ export const userThunks = {
             campaign.hasOwnProperty('_id') &&
             campaign._id === resCampaign._id
           ) {
-            console.log('updating');
+            // console.log('updating');
             dispatch(userActions.updateCampaign({ ...resCampaign }));
           } else {
             // console.log('creating new campaign');
@@ -200,7 +200,7 @@ export const userThunks = {
           `/api/campaign/campaignQuestions`,
           campaignQuestions
         );
-        console.log(response);
+        // console.log(response);
         if (response.status === 200 && response.data.success) {
           const campaign = response.data.data;
           console.log('updated campaign : ', campaign);
