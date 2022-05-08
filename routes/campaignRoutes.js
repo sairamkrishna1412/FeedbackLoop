@@ -23,8 +23,12 @@ router.post('/launch', isAuth, campaignController.launchCampaign);
 // router.post('/extendMails');
 
 /* when we get response from user */
-router.post('/response/decode', campaignController.decodeQuery);
-router.post('/response', campaignController.response);
+router.post('/response/decodeMessage', campaignController.decodeQuery);
+router.post('/response/toWebsite', campaignController.decodeUser);
+router
+  .route('/response')
+  .get(campaignController.responseGet)
+  .post(campaignController.response);
 
 /* get all responses of a campaign. These are answers to to each question and not full feedbacks. */
 router.get(

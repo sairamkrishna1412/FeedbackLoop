@@ -536,11 +536,14 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
   const subject = campaign.emailSubject;
   const html = createForm.createForm(campaign);
   const unSentEmails = [];
-  let to, mailSent, userHtml;
+  let to, mailSent, userHtml, websiteLink;
 
   for (let i = 0; i < emailsArr.length; i++) {
     to = emailsArr[i];
-    userHtml = html.replace('{%EMAIL%}', to);
+    websiteLink = encodeEmailFeedbackLink(campaign_id, emailsArr[i]);
+    userHtml = html
+      .replace('{%EMAIL%}', to)
+      .replace('{%WEBSITE-LINK%}', websiteLink);
     mailSent = await sendMail(from, to, subject, userHtml);
 
     if (!mailSent) {
@@ -575,6 +578,11 @@ const encodeQueryStr = (campaign, email, success, message) => {
   return Cipher.encrypt(queryStr);
 };
 
+const encodeEmailFeedbackLink = (campaign, email) => {
+  const queryStr = `{"campaign":"${campaign}", "email": "${email}"}`;
+  return Cipher.encrypt(queryStr);
+};
+
 exports.decodeQuery = (req, res, next) => {
   try {
     const { cipher } = req.body;
@@ -592,6 +600,35 @@ exports.decodeQuery = (req, res, next) => {
     });
   }
 };
+
+exports.decodeUser = catchAsync(async (req, res, next) => {
+  try {
+    const { cipher } = req.body;
+    let obj = Cipher.decrypt(cipher);
+    obj = JSON.parse(obj);
+    if (!obj.hasOwnProperty('campaign') || !obj.hasOwnProperty('email')) {
+      return next(new AppError(400, 'Malformed URL'));
+    }
+    const campaign = await Campaign.findById(obj.campaign).populate(
+      'campaignQuestions'
+    );
+
+    if (!campaign) {
+      return next(new AppError(400, 'No campaign exists with that ID.'));
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: { user: obj.email, campaign },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong.',
+    });
+  }
+});
 
 exports.response = async (req, res) => {
   try {
@@ -815,6 +852,218 @@ exports.response = async (req, res) => {
     return res.redirect(`/campaign/response/${queryStr}`);
   }
 };
+
+exports.responseGet = catchAsync(async (req, res) => {
+  try {
+    //get campaign mails
+    const body = req.query;
+    const campaign_id = body.campaign_id;
+    const email = body.email;
+
+    let message;
+    let queryStr;
+    // console.log('received!!!');
+    // console.log(body);
+
+    const campaignEmails = await CampaignEmail.find({
+      campaign: body.campaign_id,
+    });
+
+    /* check if user trying to submit form exists in the campaign mails */
+    const feedbackUser = campaignEmails.find((el) => el.email === body.email);
+    if (!feedbackUser) {
+      // return res.status(400).json({
+      //   success: false,
+      //   message: 'This mail is not eligible for feedback!',
+      // });
+      message = `Feedback from this mail not yet received`;
+      queryStr = encodeQueryStr(campaign_id, email, false, message);
+      return res.redirect(`/campaign/response/${queryStr}`);
+    }
+
+    /* check if or not this is users first submission (if not send message stating response for this mail already recorded) */
+    if (feedbackUser.sent) {
+      // res.status(400).json({
+      //   success: false,
+      //   message: 'Feedback from this mail is already received!',
+      // });
+      message = `Feedback from this mail is already received.\nThank you!`;
+      queryStr = encodeQueryStr(campaign_id, email, true, message);
+      return res.redirect(`/campaign/response/${queryStr}`);
+    }
+
+    /* get campaign and questions */
+    const campaign = await Campaign.findById(body.campaign_id).populate(
+      'campaignQuestions'
+    );
+    const questions = campaign.campaignQuestions;
+
+    /* store answer for each question */
+    const responses = [];
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      const { type } = question;
+
+      if (body.hasOwnProperty(question.id) && body[question.id] !== '') {
+        /* make checks for questions with choices */
+        const answer = [];
+
+        if (
+          type == 'checkbox' ||
+          type == 'range' ||
+          type == 'radio' ||
+          type == 'number' ||
+          type == 'date'
+        ) {
+          let questionResponse = body[question.id];
+
+          // range
+          if (type === 'range') {
+            questionResponse = parseInt(questionResponse);
+
+            if (
+              questionResponse < question.choices[0] ||
+              questionResponse > question.choices[1]
+            ) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`,
+              // });
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+            answer.push(String(questionResponse));
+          }
+
+          // radio
+          else if (type == 'radio') {
+            if (!question.choices.find((el) => el === questionResponse)) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is invalid. Choose from ${question.choices}`,
+              // });
+              message = `Answer for question : "${question.question}" is invalid. Choose from ${question.choices}`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            if (questionResponse.split().length > 1) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Question : ${question.question} is of type radio. Select one option only`,
+              // });
+              message = `Question : "${question.question}" is of type radio. Select one option only`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            answer.push(String(questionResponse));
+          }
+
+          // checkbox
+          else if (type == 'checkbox') {
+            if (
+              typeof questionResponse === 'string' ||
+              questionResponse instanceof String
+            ) {
+              questionResponse = [questionResponse];
+            }
+
+            questionResponse.forEach((el) => {
+              el = String(el);
+              if (question.choices.includes(el)) {
+                answer.push(el);
+              }
+            });
+          }
+
+          // number
+          else if (type === 'number') {
+            questionResponse = parseInt(questionResponse);
+
+            if (
+              question.choices.length === 2 &&
+              (questionResponse < question.choices[0] ||
+                questionResponse > question.choices[1])
+            ) {
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+            answer.push(String(questionResponse));
+          }
+
+          // date
+          else {
+            if (
+              questionResponse < question.choices[0] ||
+              questionResponse > question.choices[1]
+            ) {
+              // return res.status(400).json({
+              //   success: false,
+              //   message: `Answer for question : ${question.question} is out of range. Enter between (${question.choices[0]} - ${question.choices[0]})`,
+              // });
+              message = `Answer for question : "${question.question}" is out of range. Enter between (${question.choices[0]} - ${question.choices[1]})`;
+              queryStr = encodeQueryStr(campaign_id, email, false, message);
+              return res.redirect(`/campaign/response/${queryStr}`);
+            }
+
+            answer.push(String(questionResponse));
+          }
+        } else {
+          answer.push(String(body[question.id]));
+        }
+
+        // create response for each question
+        const response = await Response.create({
+          answer,
+          campaign: body.campaign_id,
+          question: question.id,
+        });
+        responses.push(String(response.id));
+      } else if (question.required) {
+        // return res.status(400).json({
+        //   success: false,
+        //   message: `${question.question} is a required question`,
+        // });
+        message = `Question : "${question.question}" is a required question`;
+        queryStr = encodeQueryStr(campaign_id, email, false, message);
+        return res.redirect(`/campaign/response/${queryStr}`);
+      }
+    }
+
+    /* 
+      create a feedback doc to store all responses of questions. One whole 
+      form will have 1 feedback doc and "n" responses for "n" quesitons in form.
+    */
+    const feedback = await Feedback.create({
+      email: body.email,
+      campaign: String(body.campaign_id),
+      responses,
+    });
+
+    /* update sent prop of campaignEmail doc */
+    await CampaignEmail.updateOne(
+      { email: body.email, campaign: body.campaign_id },
+      { sent: true }
+    );
+
+    /* increase responded recipientCount; */
+    campaign.respondedRecipientCount += 1;
+    campaign.lastFeedback = new Date();
+    await campaign.save();
+
+    message = `Thank You for your valuable feedback!`;
+    queryStr = encodeQueryStr(campaign_id, email, true, message);
+    return res.redirect(`/campaign/response/${queryStr}`);
+  } catch (error) {
+    console.log(error);
+    const message = `?message=Sorry, Something went wrong.`;
+    const queryStr = Cipher.encrypt(message);
+    return res.redirect(`/campaign/response/${queryStr}`);
+  }
+});
 
 exports.getResponses = catchAsync(async (req, res) => {
   /* get responses of that campaign */

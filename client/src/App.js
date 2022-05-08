@@ -16,6 +16,7 @@ import CampaignSummary from './pages/CampaignSummary/CampaignSummary';
 import NewCampaign from './pages/NewCampaign/NewCampaign';
 import Authenticate from './components/Auth/Authenticate';
 import CampaignResponse from './pages/CampaignResponse/CampaignResponse';
+import WebsiteResponse from './pages/WebsiteResponse/WebsiteResponse';
 
 import './App.css';
 
@@ -49,6 +50,9 @@ function App() {
         </Route>
         <Route path="/campaign/response/:query" exact>
           <CampaignResponse></CampaignResponse>
+        </Route>
+        <Route path="/campaign/redirect/:query" exact>
+          <WebsiteResponse></WebsiteResponse>
         </Route>
         <Route path="/campaign/:id">
           <CampaignSummary></CampaignSummary>

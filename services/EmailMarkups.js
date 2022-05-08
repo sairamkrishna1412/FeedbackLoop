@@ -549,7 +549,7 @@ exports.getCampaignMarkup = (opts) => `<html>
                                 class="div-6"
                               >
                               <!-- continue here -->
-                                <form action="${keys.API_ENDPOINT}/campaign/response" method="post">
+                                <form action="${keys.API_ENDPOINT}/campaign/response" method="get">
                                   ${opts.questionsMarkup}
                                   <input type="hidden" name="campaign_id" value="${opts.campaign.campaignId}"/>
                                   <input type="hidden" name="email" value="{%EMAIL%}"/>
@@ -570,6 +570,11 @@ exports.getCampaignMarkup = (opts) => `<html>
                                     value="Submit"
                                   />
                                 </form>
+                                <hr style="margin-top: 50px;color: 4b5563;">
+                                <div style="margin-top: 20px;">
+                                  <p style="font-size : 12px; color: #4b5563;">Unable to submit form? <br><br> First, Please check if you have answered all required questions with a (<span style="font-size: 12px; color: #FF0000;">*</span>) after question.<br><br> Second, Check if all your answers are within the question contraints i.e some questions have limits like minimum and maximum value. If any of your answers are out of limits a message will be shown on the new browser window after you click submit. The message indicates what went wrong. Please make changes accordingly. <br><br>If you are still not able to submit. Sorry. Could you please click the button below.</p>
+                                  <a style="text-decoration: none; color: #333  ; padding: 5px 10px; border: 1px solid #8db1ff; font-size : 12px;" href="${keys.WEBSITE_ENDPOINT}/campaign/redirect/{%WEBSITE-LINK%}">Try different way!</a>
+                                </div>
                               </div>
                             </td>
                           </tr>

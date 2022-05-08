@@ -17,9 +17,12 @@ const Response = (props) => {
   useEffect(() => {
     dispatch(uiActions.startLoading());
     const decoder = async () => {
-      const response = await axios.post('/api/campaign/response/decode', {
-        cipher: query,
-      });
+      const response = await axios.post(
+        '/api/campaign/response/decodeMessage',
+        {
+          cipher: query,
+        }
+      );
       if (response.status === 200 && response.data.success) {
         setQueryStr(response.data.data);
       }
