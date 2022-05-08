@@ -260,8 +260,12 @@ const SummaryChart = (props) => {
       type = 'wordCloud';
       labels = [...summary.valCountsOrdered];
       dataValues = labels.map((val) => summary.valCounts[val] || 0);
+      console.log(dataValues);
       const sum = dataValues.reduce((prev, cur) => prev + cur, 0);
-      dataValues = dataValues.map((el) => (el / sum) * 300);
+      console.log(sum);
+      dataValues = dataValues.map((el) => (el / sum) * 100);
+      console.log(dataValues);
+      console.log(dataValues.reduce((prev, cur) => prev + cur, 0));
 
       // options.color = 'rgba(59, 130, 246, 0.5)';
       // console.log(dataValues);
