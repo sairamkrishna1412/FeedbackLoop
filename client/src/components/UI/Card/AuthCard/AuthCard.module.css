@@ -11,3 +11,58 @@
 .cardInner {
   padding: 7rem 10rem;
 }
+
+@media screen and (max-width: 1440px) {
+  .cardContainer {
+    width: 50%;
+    max-width: 50%;
+  }
+
+  .cardInner {
+    padding: 7rem 7rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .cardContainer {
+    width: 65%;
+    max-width: 65%;
+  }
+
+  .cardInner {
+    padding: 7rem 5rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .cardContainer {
+    width: 65%;
+    max-width: 65%;
+  }
+
+  .cardInner {
+    padding: 7rem 4rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .cardContainer {
+    width: 70%;
+    max-width: 70%;
+  }
+
+  .cardInner {
+    padding: 7rem 4rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .cardContainer {
+    width: 85%;
+    max-width: 85%;
+  }
+
+  .cardInner {
+    padding: 7rem 2rem;
+  }
+}

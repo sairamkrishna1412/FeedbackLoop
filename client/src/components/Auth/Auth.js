@@ -24,10 +24,17 @@ const Auth = (props) => {
   }
   return (
     <AuthCard>
-      <h2 className={`heading-h2`}>{authText}</h2>
+      <h2 className={`heading-h2 !text-[24px] md:!text-[32px] lg:!text-[40px]`}>
+        {authText}
+      </h2>
       <div className={styles.authAltLinkContainer}>
-        <span>Don't have an account? </span>
-        <Link to={altLink} className="link">
+        <span className=" !text-[16px] sm:!text-[18px] lg:!text-[20px]">
+          Don't have an account?{' '}
+        </span>
+        <Link
+          to={altLink}
+          className="link !text-[16px] sm:!text-[18px] lg:!text-[20px]"
+        >
           {altText}
         </Link>
       </div>

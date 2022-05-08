@@ -32,3 +32,18 @@
 .newCampaignBtn svg {
   font-size: 2rem;
 }
+
+@media screen and (max-width: 640px) {
+  .newCampaignBtn {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    padding: 1.5rem 1.6rem;
+    border-radius: 5rem;
+    color: #fff;
+    background-color: #080808;
+  }
+  .newCampaignBtn svg {
+    font-size: 1.5rem;
+  }
+}

@@ -19,7 +19,7 @@
 }
 
 .number-box--bottom {
-  bottom: -6rem;
+  bottom: -5rem;
 }
 
 .number {
@@ -29,7 +29,7 @@
 
 .number-small {
   width: fit-content;
-  padding: 1.5rem 2rem;
+  padding: 1.3rem 2rem;
   margin-bottom: 2rem;
   border-radius: 5rem;
   font-size: 1.6rem;
@@ -38,7 +38,7 @@
 }
 
 .number-big {
-  padding: 2.5rem 3.1rem;
+  padding: 2rem 3.1rem;
   margin-bottom: 2rem;
   border-radius: 5rem;
   font-size: 2.5rem;
@@ -72,7 +72,7 @@ textarea {
 }
 
 .form-wrapper label {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
 }
 
 .form-control {
@@ -140,8 +140,8 @@ textarea {
 }
 
 .separator {
-  margin: 7rem auto;
-  width: 90%;
+  margin: 6rem auto;
+  width: 100%;
   height: 2px;
   border-radius: 10px;
   background-color: #7e7e7e;
@@ -196,9 +196,11 @@ textarea {
 .add-question {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 3rem;
 }
 .add-question svg {
+  color: #739ffe;
   cursor: pointer;
 }
 
@@ -213,11 +215,11 @@ textarea {
 
 .preview-section {
   position: relative;
-  margin-bottom: 10rem;
+  max-width: 80%;
+  margin: 0 auto 10rem;
   border: 1px solid #d3d3d3;
   border-radius: 5px;
-  padding: 4rem;
-  padding-top: 6rem;
+  padding: 6rem 1rem 4rem;
 }
 
 .number-box--preview {
@@ -227,7 +229,6 @@ textarea {
 .plainCard_preview {
   padding: 7rem 8rem;
 }
-
 /* .number-box--preview::after {
   content: '';
   position: absolute;
@@ -239,37 +240,105 @@ textarea {
   z-index: -1;
 } */
 
-@media only screen and (max-width: 1550px) {
-  .form-wrapper--break label {
-    padding-bottom: 15px;
+@media only screen and (max-width: 1280px) {
+  .form-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .form-wrapper--extra {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: row;
   }
 
-  .form-control--break {
-    width: 120%;
-    max-width: 120%;
-  }
-  .separator {
-    margin: 6rem auto;
-    width: 100%;
-  }
-}
-@media only screen and (max-width: 480px) {
   .form-wrapper label {
-    padding-bottom: 6px;
+    font-size: 1.8rem;
   }
   .form-control {
-    width: 97%;
-    max-width: 101%;
+    width: 100%;
+    max-width: 100%;
+    font-size: 1.6rem;
+    padding: 0 10px;
   }
 
-  .container-wrapper {
-    width: 95%;
+  .form-control--small {
+    width: 30%;
+    padding: 0 10px;
   }
+
+  .form-control--option {
+    font-size: 1.6rem;
+    width: 80%;
+  }
+  .add-option {
+    font-size: 1.3rem;
+    margin-left: 0;
+  }
+  .question-subhead {
+    font-size: 1.6rem;
+    margin: 2rem 0rem 1rem;
+  }
+  .separator {
+    margin: 4rem auto;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .preview-section {
+    max-width: 90%;
+  }
+}
+
+@media screen and (max-width: 768px) {
   .question-opts__block {
-    display: inline-block;
+    margin-top: 2rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-wrapper--extra {
+    flex-direction: column;
+  }
+  .form-control--small {
+    width: 100%;
+    padding: 0 10px;
+  }
+  .opt-label {
+    font-size: 1.6rem;
   }
   .opt-item {
     justify-content: space-between;
     margin-top: 2rem;
+  }
+  .form-wrapper textarea {
+    padding: 10px;
+    height: 30rem;
+  }
+
+  .preview-section {
+    max-width: 95%;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .container-wrapper {
+    margin-top: 5rem;
+  }
+
+  .form-wrapper label {
+    font-size: 1.6rem;
+  }
+
+  .separator {
+    margin: 3rem auto;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .form-wrapper label {
+    font-size: 1.6rem;
+  }
+  .question-box {
+    padding: 3rem 1.7rem;
   }
 }

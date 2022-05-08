@@ -11,19 +11,29 @@
 .cardInner {
   padding: 7rem 10rem;
 }
+
 @media screen and (max-width: 1024px) {
   .cardInner {
-    padding: 7rem 8rem;
+    padding: 7rem 4rem;
+  }
+  .cardContainer {
+    width: 90%;
+    max-width: 100%;
   }
 }
-@media screen and (max-width: 480px) 
-{
+
+@media screen and (max-width: 640px) {
   .cardInner {
     padding: 7rem 2rem;
-      }
-      .cardContainer {
-        width: 90%;
-        max-width: 100%;
-      }
+  }
+}
 
+@media screen and (max-width: 480px) {
+  .cardInner {
+    padding: 7rem 2rem;
+  }
+  .cardContainer {
+    width: 90%;
+    max-width: 100%;
+  }
 }

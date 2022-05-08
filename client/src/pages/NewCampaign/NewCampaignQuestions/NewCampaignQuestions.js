@@ -190,7 +190,7 @@ const NewCampaignQuestions = (props) => {
         <div className={`${styles['number-box']} ${styles['number-box--top']}`}>
           <div className={`${styles['number']} ${styles['number-big']}`}>2</div>
         </div>
-        <PlainCard>
+        <PlainCard className="!w-[95%]" innerClassName="!px-4">
           <form onSubmit={formSubmitHandler}>
             {/* {console.log('this ran', questionArr)} */}
             {questionArr}

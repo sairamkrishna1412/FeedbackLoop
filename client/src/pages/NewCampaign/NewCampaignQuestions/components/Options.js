@@ -97,7 +97,7 @@ const Options = (props) => {
       {displayOptions}
       <div className="pointer">
         <span className={styles['add-option']} onClick={addOption}>
-          Add Option
+          + Add Option
         </span>
       </div>
     </React.Fragment>

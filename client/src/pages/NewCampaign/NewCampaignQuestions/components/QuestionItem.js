@@ -96,7 +96,9 @@ const QuestionItem = (props) => {
     let content;
     if (values.type === 'number') {
       content = (
-        <div className={styles['form-wrapper']}>
+        <div
+          className={`${styles['form-wrapper']} ${styles['form-wrapper--extra']}`}
+        >
           <label htmlFor="min">Min</label>
           <input
             className={`${styles['form-control']} ${styles['form-control--small']}`}
@@ -119,7 +121,7 @@ const QuestionItem = (props) => {
       );
     } else if (values.type === 'text') {
       content = (
-        <div className={styles['form-wrapper']}>
+        <div className={`${styles['form-wrapper']}`}>
           <label htmlFor="maxChars">Max characters</label>
           <input
             className={styles['form-control']}
@@ -186,7 +188,9 @@ const QuestionItem = (props) => {
     // for date
     else {
       content = (
-        <div className={styles['form-wrapper']}>
+        <div
+          className={`${styles['form-wrapper']}  ${styles['form-wrapper--extra']}`}
+        >
           <label htmlFor="min">Min</label>
           <input
             className={`${styles['form-control']} ${styles['form-control--small']}`}

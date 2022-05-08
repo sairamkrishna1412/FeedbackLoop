@@ -44,11 +44,17 @@
   font-size: 2.4rem;
   font-weight: 400;
 }
-@media screen and (max-device-width: 480px) {
+
+@media screen and (max-width: 640px) {
+  .campItem {
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+  }
   .campsRow span {
-    display: inline-block;
-    width: 32%;
-    text-align: center;
-    font-size: 2rem;
+    width: auto;
+  }
+  .campsRow {
+    align-items: normal;
   }
 }

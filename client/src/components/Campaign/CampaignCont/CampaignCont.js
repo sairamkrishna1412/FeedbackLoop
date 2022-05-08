@@ -27,7 +27,9 @@ function CampaignCont(props) {
       <h2 className="subHeading">{props.heading}</h2>
       <Container>
         {/* <div className={styles.campsCont}> */}
-        <div className={`${styles.campsRow} text-[20px] font-medium`}>
+        <div
+          className={`${styles.campsRow} text-[20px] font-medium !hidden sm:!flex`}
+        >
           {props.heading === 'Launched Campaigns' ? (
             <React.Fragment>
               <span>Name</span>

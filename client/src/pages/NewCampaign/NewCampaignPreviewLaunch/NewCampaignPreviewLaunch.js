@@ -87,7 +87,7 @@ const NewCampaignPreviewLaunch = (props) => {
         <div className={`${styles['number-box']} ${styles['number-box--top']}`}>
           <div className={`${styles['number']} ${styles['number-big']}`}>4</div>
         </div>
-        <PlainCard innerClassName={styles['plainCard_preview']}>
+        <PlainCard className="!w-[95%]" innerClassName="!px-4">
           <div className={`${styles['preview-section']}`}>
             <NewCampaignPreviewButton value={1}></NewCampaignPreviewButton>
             <div

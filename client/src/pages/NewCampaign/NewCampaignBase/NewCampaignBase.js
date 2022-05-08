@@ -108,7 +108,7 @@ const NewCampaignBase = (props) => {
       <h2 className={`subHeading`}>
         {campaign.campaignName !== '' ? campaign.campaignName : 'New Campaign'}
       </h2>
-      <Container className={styles['container-wrapper']}>
+      <Container className={`${styles['container-wrapper']}`}>
         <div className={`${styles['number-box']} ${styles['number-box--top']}`}>
           <div className={`${styles['number']} ${styles['number-big']}`}>1</div>
         </div>

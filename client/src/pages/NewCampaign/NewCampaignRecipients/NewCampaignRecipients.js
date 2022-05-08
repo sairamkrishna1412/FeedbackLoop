@@ -144,7 +144,7 @@ const NewCampaignRecipients = (props) => {
         <div className={`${styles['number-box']} ${styles['number-box--top']}`}>
           <div className={`${styles['number']} ${styles['number-big']}`}>3</div>
         </div>
-        <PlainCard>
+        <PlainCard className="!w-[95%]" innerClassName="!px-4">
           <form onSubmit={formSubmitHandler}>
             <div className={styles['form-wrapper']}>
               <label htmlFor="recipients">Recipients</label>

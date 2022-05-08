@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-// import { Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../../components/UI/Header/Header';
 // import Loader from '../../components/UI/Loader/Loader';
 import CampaignCont from '../../components/Campaign/CampaignCont/CampaignCont';
@@ -68,7 +68,9 @@ function Dashboard() {
         ></CampaignCont>
       </div>
       <div className={styles.newCampaignBtn}>
-        <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
+        <Link to={'/newCampaign'}>
+          <FontAwesomeIcon icon={faPlus}></FontAwesomeIcon>
+        </Link>
       </div>
     </React.Fragment>
   );

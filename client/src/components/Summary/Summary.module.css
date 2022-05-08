@@ -7,3 +7,38 @@
   display: flex;
   flex-direction: column;
 }
+
+.chart-size {
+  height: 580px;
+  width: auto;
+}
+
+@media screen and (max-width: 1440px) {
+  .chart-size {
+    height: 495px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .chart-size {
+    height: 435px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .chart-size {
+    height: 345px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .chart-size {
+    height: 323px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .chart-size {
+    height: 300px;
+  }
+}

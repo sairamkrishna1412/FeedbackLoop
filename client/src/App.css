@@ -73,7 +73,7 @@
 
 .subHeading {
   font-size: 2.4rem;
-  font-weight: 400;
+  font-weight: 300;
   color: #191919;
 }
 
@@ -158,20 +158,32 @@
 .pointer {
   cursor: pointer;
 }
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1440px) {
   .container {
     width: 80%;
   }
 }
-@media screen and (max-width: 480px) {
+
+@media screen and (max-width: 1024px) {
+  .subHeading {
+    font-size: 2rem;
+    font-weight: 280;
+  }
   .logo {
-    font-size: 2.4rem;
-    font-weight: 300;
+    font-size: 2.3rem;
+    font-weight: 350;
   }
 }
+
+@media screen and (max-width: 640px) {
+  .container {
+    width: 90%;
+  }
+}
+
 @media screen and (max-width: 480px) {
   .logo {
-    font-size: 2.6rem;
+    font-size: 2.3rem;
     font-weight: 350;
   }
   .btn {
@@ -184,12 +196,6 @@
     display: inline-block;
     cursor: pointer;
     margin-right: auto;
-  }
-  .subHeading {
-    font-size: 2.3rem;
-    font-weight: 280;
-    color: #191919;
-    margin-bottom: 55px;
   }
   .container {
     width: 90%;

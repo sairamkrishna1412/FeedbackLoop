@@ -124,7 +124,7 @@ function CampaignSummary() {
   }
 
   return (
-    <div className={`container`}>
+    <div className={`!w-[95%] sm:!w-[90%] md:!w-[80%] 2xl:!w-[70%] mx-auto`}>
       <Header></Header>
       <div className={styles.newBlock}>
         <h2 className="subHeading">Summary</h2>
@@ -134,12 +134,14 @@ function CampaignSummary() {
               <h2>{campaign.campaignName}</h2>
             </div>
           </div>
-          <div className="flex justify-around items-center">
+          <div className="justify-around items-center hidden md:flex">
             <div
-              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-5xl bg-slate-100`}
+              className={`flex flex-col items-center gap-5 px-4 py-10 xl:px-16 xl:py-10 rounded-2xl text-3xl md:text-4xl lg:text-5xl bg-slate-100`}
             >
               <div className="flex items-center gap-3">
-                <span className="font-medium text-4xl">Questions</span>
+                <span className="font-medium text-2xl md:text-[17px] lg:text-4xl">
+                  Questions
+                </span>
                 <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
                   <FontAwesomeIcon icon={faQuestion}></FontAwesomeIcon>
                 </div>
@@ -149,44 +151,118 @@ function CampaignSummary() {
               </span>
             </div>
             <div
-              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
+              className={`flex flex-col items-center gap-5 px-4 py-10 xl:px-16 xl:py-10 lg:h-48 rounded-2xl text-3xl md:text-4xl lg:text-5xl bg-slate-100`}
             >
               <div className="flex items-center gap-3">
-                <span className="font-medium text-4xl">Last Feedback</span>
+                <span className="font-medium text-2xl md:text-[17px] lg:text-4xl">
+                  Last Feedback
+                </span>
                 <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
                   <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
                 </div>
               </div>
-              <span className="text-[18px]">
+              <span className="text-[16px] lg:text-[18px]">
                 {new Date(campaign.createdAt).toLocaleString(undefined, {
                   dateStyle: 'long',
                 })}
               </span>
             </div>
             <div
-              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
+              className={`flex flex-col items-center gap-5 px-4 py-10 xl:px-16 xl:py-10 rounded-2xl text-3xl md:text-4xl lg:text-5xl bg-slate-100`}
             >
               <div className="flex items-center gap-3">
-                <span className="font-medium text-4xl">Emails Sent</span>
+                <span className="font-medium text-2xl md:text-[17px] lg:text-4xl">
+                  Emails Sent
+                </span>
                 <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
                   <FontAwesomeIcon icon={faPaperPlane}></FontAwesomeIcon>
                 </div>
               </div>
-              <span className="text-blueGray-700 font-bold text-5xl">
+              <span className="text-blueGray-700 font-bold">
                 {campaign.recipientCount}
               </span>
             </div>
             <div
-              className={`flex flex-col items-center gap-5 px-16 py-10 rounded-2xl text-4xl bg-slate-100`}
+              className={`flex flex-col items-center gap-5 px-4 py-10 xl:px-16 xl:py-10 rounded-2xl text-3xl md:text-4xl lg:text-5xl bg-slate-100`}
             >
               <div className="flex items-center gap-3">
-                <span className="font-medium text-4xl">Responses</span>
+                <span className="font-medium text-2xl md:text-[17px] lg:text-4xl">
+                  Responses
+                </span>
                 <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
                   <FontAwesomeIcon icon={faComments}></FontAwesomeIcon>
                 </div>
               </div>
-              <span className="text-blueGray-700 font-bold text-5xl">
+              <span className="text-blueGray-700 font-bold">
                 {campaign.respondedRecipientCount}
+              </span>
+            </div>
+          </div>
+          {/* BREAKKKKKKKKKKK */}
+          <div className="flex flex-col gap-6 md:hidden mt-5">
+            <div
+              className={`flex justify-between sm:justify-around px-10 sm:px-4 py-8 rounded-2xl text-[16px] sm:text-[18px] bg-slate-100`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faQuestion}></FontAwesomeIcon>
+                </div>
+                <span className="font-medium text-[16px] sm:text-[18px]">
+                  Questions
+                </span>
+              </div>
+              <span className="text-blueGray-700 font-bold">
+                {campaign.campaignQuestions.length}
+              </span>
+            </div>
+
+            <div
+              className={`flex justify-between sm:justify-around px-10 sm:px-4 py-8 rounded-2xl text-[16px] sm:text-[18px] bg-slate-100`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faComments}></FontAwesomeIcon>
+                </div>
+                <span className="font-medium text-[16px] sm:text-[18px]">
+                  Responses
+                </span>
+              </div>
+              <span className="text-blueGray-700 font-bold">
+                {campaign.respondedRecipientCount}
+              </span>
+            </div>
+
+            <div
+              className={`flex justify-between sm:justify-around px-10 sm:px-4 py-8 rounded-2xl text-[16px] sm:text-[18px] bg-slate-100`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faPaperPlane}></FontAwesomeIcon>
+                </div>
+                <span className="font-medium text-[16px] sm:text-[18px]">
+                  Emails Sent
+                </span>
+              </div>
+              <span className="text-blueGray-700 font-bold">
+                {campaign.recipientCount}
+              </span>
+            </div>
+
+            <div
+              className={`flex justify-between sm:justify-around px-10 sm:px-4 py-8 rounded-2xl text-[16px] sm:text-[18px] bg-slate-100`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                  <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
+                </div>
+                <span className="font-medium text-[16px] sm:text-[18px]">
+                  Last Feedback
+                </span>
+              </div>
+              <span className="text-[16px] lg:text-[18px]">
+                {new Date(campaign.createdAt).toLocaleString(undefined, {
+                  dateStyle: 'long',
+                })}
               </span>
             </div>
           </div>

@@ -20,6 +20,8 @@ import 'chartjs-adapter-date-fns';
 import { enIN } from 'date-fns/locale';
 import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
 
+import styles from '../Summary.module.css';
+
 const SummaryChart = (props) => {
   const { question, summary } = props;
   // console.log(question, summary);
@@ -57,10 +59,11 @@ const SummaryChart = (props) => {
 
   // Generic options object
   const options = {
-    responsive: true,
-    layout: {
-      padding: 5,
-    },
+    // responsive: true,
+    maintainAspectRatio: false,
+    // layout: {
+    //   padding: 5,
+    // },
     plugins: {
       legend: {
         display: true,
@@ -158,7 +161,7 @@ const SummaryChart = (props) => {
             },
           },
         };
-        style = { maxHeight: '600px' };
+        // style = { maxHeight: '600px' };
       }
 
       data = {
@@ -273,7 +276,7 @@ const SummaryChart = (props) => {
           },
         ],
       };
-      style = { maxHeight: '400px', height: '400px' };
+      // style = { maxHeight: '400px', height: '400px' };
     }
   }
 
@@ -289,11 +292,17 @@ const SummaryChart = (props) => {
     //   );
     // } else {
     chartJsx = (
-      <Chart type={type} options={options} data={data} style={style} />
+      <div className={`${styles['chart-size']}`}>
+        <Chart type={type} options={options} data={data} />
+      </div>
     );
   // }
 
-  return <div>{chartJsx ? chartJsx : 'Summary Chart'}</div>;
+  return (
+    <React.Fragment>
+      {chartJsx ? chartJsx : <p>Summary Chart</p>}
+    </React.Fragment>
+  );
 };
 
 // // Recharts code

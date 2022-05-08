@@ -22,20 +22,20 @@ const QuestionResponses = (props) => {
   return (
     <div className={`${styles.whiteBlock}`}>
       <div className="text-3xl grid grid-cols-2 rounded-t-[10px] border border-b-blueGray-300">
-        <div className="w-full px-4">
+        <div className="w-full px-2 sm:px-4 col-span-2 sm:col-span-1">
           <div className="relative flex flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0">
-            <div className="flex-auto p-4">
-              <div className="flex flex-wrap">
-                <div className="relative w-full pr-4 max-w-full flex-grow flex-1">
+            <div className="flex-auto p-2 sm:p-4">
+              <div className="flex flex-wrap justify-between">
+                <div className="relative w-full sm:pr-4 max-w-full flex-grow flex-1">
                   <h5 className="text-blueGray-400 uppercase font-bold text-xl">
                     Question
                   </h5>
-                  <span className="font-semibold text-[20px] text-blueGray-700">
+                  <span className="font-semibold text-[16px] sm:text-[18px] lg:text-[20px] text-blueGray-700">
                     {question.question}
                   </span>
                 </div>
-                <div className="relative w-auto pl-4 flex-initial">
-                  <div className="text-white p-3 text-center inline-flex items-center justify-center w-16 h-16 shadow-lg rounded-full bg-blue-500">
+                <div className="relative w-auto sm:pl-4 flex-initial self-center">
+                  <div className="text-white p-3 text-center inline-flex items-center justify-center text-[16px] w-12 h-12 sm:w-16 sm:h-16  shadow-lg rounded-full bg-blue-500">
                     <FontAwesomeIcon icon={faQuestion}></FontAwesomeIcon>
                   </div>
                 </div>
@@ -43,20 +43,20 @@ const QuestionResponses = (props) => {
             </div>
           </div>
         </div>
-        <div className="w-full px-4">
+        <div className="w-full px-2 sm:px-4 col-span-2 sm:col-span-1">
           <div className="relative flex flex-col min-w-0 break-words bg-white rounded mb-6 xl:mb-0">
-            <div className="flex-auto p-4">
+            <div className="flex-auto p-2 sm:p-4">
               <div className="flex flex-wrap">
-                <div className="relative w-full pr-4 max-w-full flex-grow flex-1">
+                <div className="relative w-full sm:pr-4 max-w-full flex-grow flex-1">
                   <h5 className="text-blueGray-400 uppercase font-bold text-xl">
                     Type
                   </h5>
-                  <span className="font-semibold text-[20px] text-blueGray-700 capitalize">
+                  <span className="font-semibold text-[16px] sm:text-[18px] lg:text-[20px] text-blueGray-700 capitalize">
                     {question.type}
                   </span>
                 </div>
-                <div className="relative w-auto pl-4 flex-initial">
-                  <div className="text-white p-3 text-center inline-flex items-center justify-center w-16 h-16 shadow-lg rounded-full bg-blue-500">
+                <div className="relative w-auto sm:pl-4 flex-initial self-center">
+                  <div className="text-white p-3 text-center inline-flex items-center justify-center text-[16px] w-12 h-12 sm:w-16 sm:h-16 shadow-lg rounded-full bg-blue-500">
                     {/* <FontAwesomeIcon icon={faPencilAlt}></FontAwesomeIcon> */}
                     <FontAwesomeIcon icon={faHandPointer} />
                   </div>

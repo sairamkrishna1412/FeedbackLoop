@@ -31,7 +31,7 @@
 }
 @media screen and (max-width: 480px) {
   .quickSummaryItem {
-    width: 31%;
+    width: 45%;
   }
   .summaryHeading {
     font-size: 1.8rem;

@@ -8,7 +8,7 @@ const NavItem = (props) => {
   return (
     <div>
       <span
-        className={` pb-1 cursor-pointer border-0 border-blue-400 hover:border-b-2 hover:text-gray-800 ${
+        className={` pb-1 cursor-pointer border-0 border-blue-400 hover:border-b-2 hover:text-gray-800 text-[16px] sm:text-[18px] ${
           active && 'border-b-2 text-gray-800'
         }`}
         onClick={onClickHandler}
