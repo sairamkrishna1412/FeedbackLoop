@@ -1,23 +1,27 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const responseSchema = new mongoose.Schema({
   question: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question',
-    required: [true, 'Provide a valid question ID'],
+    ref: "Question",
+    required: [true, "Provide a valid question ID"],
   },
   campaign: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campaign',
-    required: [true, 'Provide a valid campaign ID'],
+    ref: "Campaign",
+    required: [true, "Provide a valid campaign ID"],
   },
   answer: {
     type: [String],
-    required: [true, 'Please provide your answer'],
+    required: [true, "Please provide your answer"],
     validate: {
       validator: (answer) => answer.length,
-      message: 'Please provide your answer',
+      message: "Please provide your answer",
     },
+  },
+  createdDate: {
+    type: Date,
+    default: new Date(),
   },
   // feedback: {
   //   type: mongoose.Schema.Types.ObjectId,
@@ -25,5 +29,5 @@ const responseSchema = new mongoose.Schema({
   // },
 });
 
-const responseModel = mongoose.model('Response', responseSchema);
+const responseModel = mongoose.model("Response", responseSchema);
 module.exports = responseModel;

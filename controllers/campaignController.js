@@ -1,21 +1,35 @@
-const validator = require('validator');
-const Campaign = require('../models/campaignModel');
-const Question = require('../models/questionModel');
-const CampaignEmail = require('../models/campaignEmailModel');
-const Response = require('../models/responseModel');
-const Feedback = require('../models/feedbackModel');
-const sendMail = require('../services/nodemailer');
-const AppError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
-const createForm = require('../services/createForm');
-const Cipher = require('../services/Cipher');
+const validator = require("validator");
+const Campaign = require("../models/campaignModel");
+const Question = require("../models/questionModel");
+const CampaignEmail = require("../models/campaignEmailModel");
+const Response = require("../models/responseModel");
+const Feedback = require("../models/feedbackModel");
+const sendMail = require("../services/nodemailer");
+const AppError = require("../utils/appError");
+const catchAsync = require("../utils/catchAsync");
+const createForm = require("../services/createForm");
+const Cipher = require("../services/Cipher");
 
 exports.checkCampaignOwner = catchAsync(async (req, res, next) => {
-  const reqCampaign = await Campaign.findById(req.params.id).lean();
+  let campaignId;
+  if (req.params.id) {
+    campaignId = req.params.id;
+  } else if (
+    req.body?.campaign_id ||
+    req.body?.campaign ||
+    req.body?.campaignId
+  ) {
+    campaignId =
+      req.body?.campaign_id ||
+      req.body?.campaign?._id ||
+      req.body?.campaign?.campaign_id ||
+      req.body.campaignId;
+  }
+  const reqCampaign = await Campaign.findById(campaignId).lean();
 
   if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
     return next(
-      new AppError(400, 'No campaign with that id exists in your campaigns')
+      new AppError(400, "No campaign with that id exists in your campaigns")
     );
   }
 
@@ -32,18 +46,18 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
   const userCampaings = await Campaign.find({ id: user.id });
 
   /* this check is for updating campaign base */
-  if (req.body.hasOwnProperty('_id')) {
+  if (req.body.hasOwnProperty("_id")) {
     const existingInd = userCampaings.findIndex(
       (camp) => String(camp._id) === req.body._id
     );
 
     if (existingInd === -1) {
-      return next(new AppError(400, 'No campaign with that id found!'));
+      return next(new AppError(400, "No campaign with that id found!"));
     }
 
     doc = await Campaign.findByIdAndUpdate(req.body._id, req.body, {
       new: true,
-    }).populate('campaignQuestions');
+    }).populate("campaignQuestions");
   }
 
   // this is for creating new campapign
@@ -57,7 +71,7 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
       return next(
         new AppError(
           400,
-          'Campaign with that name already exists. Please change the campaign name'
+          "Campaign with that name already exists. Please change the campaign name"
         )
       );
     }
@@ -74,16 +88,12 @@ exports.newCampaign = catchAsync(async (req, res, next) => {
 checkCampaignOwnerWithID = async (campaign_id, user_id) => {
   try {
     const campaign = await Campaign.findById(campaign_id)
-      .populate('campaignQuestions')
+      .populate("campaignQuestions")
       .lean();
-
-    campaign.campaignQuestions = campaign.campaignQuestions.sort(
-      (a, b) => a.index - b.index
-    );
 
     // console.log(campaign);
     if (!campaign || String(campaign.user) !== user_id) {
-      throw new AppError(400, 'There is no such campaign in your campaigns');
+      throw new AppError(400, "There is no such campaign in your campaigns");
     }
     return campaign;
   } catch (error) {
@@ -95,14 +105,14 @@ exports.checkUserFeedback = catchAsync(async (req, res, next) => {
   const { campaign_id: campaign, email } = req.body;
   const user = await CampaignEmail.findOne({ campaign, email });
   if (!user) {
-    return next(new AppError(400, 'Feedback still pending. please try again!'));
+    return next(new AppError(400, "Feedback still pending. please try again!"));
   }
   if (!user.sent) {
-    return next(new AppError(400, 'Feedback still pending. please try again!'));
+    return next(new AppError(400, "Feedback still pending. please try again!"));
   }
   return res.status(200).json({
     success: true,
-    message: '',
+    message: "",
   });
 });
 
@@ -110,6 +120,10 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
   //check emails
   const { campaign_id: campaign } = req.body;
   const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
+
+  curCampaign.campaignQuestions = curCampaign.campaignQuestions.sort(
+    (a, b) => a.index - b.index
+  );
 
   await CampaignEmail.deleteMany({ campaign });
 
@@ -127,7 +141,7 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
   if (!dbEmails.length) {
     return res.status(400).json({
       success: false,
-      message: 'Emails already exist in campaign',
+      message: "Emails already exist in campaign",
     });
   }
 
@@ -149,47 +163,106 @@ exports.campaignEmails = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.addtionalCampaignEmails = catchAsync(async (req, res, next) => {
+exports.sendMoreEmails = catchAsync(async (req, res, next) => {
   //check emails
-  const { campaign_id: campaign } = req.body;
-  const curCampaign = await checkCampaignOwnerWithID(campaign, req.user.id);
-
-  const existingEmails = await CampaignEmail.find({ campaign }).select('email');
+  const { campaignId, campaignEmails } = req.body;
+  const campaign = await Campaign.findById(campaignId).populate(
+    "campaignQuestions"
+  );
+  const existingEmails = await CampaignEmail.find({
+    campaign: campaignId,
+  }).select("email");
 
   const emailsArr = existingEmails.map((el) => el.email);
 
-  let recipientCount = existingEmails.length;
-
-  const dbEmails = [];
-  req.body.campaignEmails.forEach((email) => {
+  const newEmails = [];
+  const resendEmails = [];
+  campaignEmails.forEach((email) => {
     if (!validator.isEmail(email)) {
       return next(
         new AppError(400, `${email} is not an email. please make changes.`)
       );
     }
 
+    //start here
     if (!emailsArr.includes(email)) {
-      dbEmails.push({ campaign, email, sent: false });
-      recipientCount++;
+      newEmails.push({ campaign, email, sent: false });
+    } else {
+      resendEmails.push(email);
     }
   });
 
-  if (!dbEmails.length) {
-    return next(new AppError(400, 'Emails already exist in campaign'));
+  if (!newEmails.length && !resendEmails.length) {
+    return next(new AppError(400, "Emails already exist in campaign"));
   }
 
   //insert emails
-  const docs = await CampaignEmail.insertMany(dbEmails);
+  const docs = await CampaignEmail.insertMany(newEmails);
+  const addedMails = docs.map((e) => e.email);
+  const unAddedMails = campaignEmails.filter((e) => !addedMails.includes(e));
 
-  //update campaign recipients property
-  await Campaign.findByIdAndUpdate(campaign, { recipientCount });
+  //update resend email
+  const modifiedData = await CampaignEmail.updateMany(
+    {
+      $and: [
+        {
+          campaign: campaignId,
+          $expr: {
+            $in: ["$email", [...resendEmails]],
+          },
+        },
+      ],
+    },
+    {
+      $set: {
+        sent: false,
+      },
+    }
+  );
+
+  console.log(modifiedData);
+
+  const { unSentMails, sentMails } = await sendMails(
+    `${req.user.email}`,
+    campaign,
+    [...addedMails, ...resendEmails]
+  );
+
+  if (unSentMails.length) {
+    //previously sent emails should not be deleted.
+    const shouldDeleteMails = unSentMails.filter(
+      (mail) => !resendEmails.includes(mail)
+    );
+    await CampaignEmail.deleteMany({
+      campaign: campaign._id,
+      email: {
+        $in: [...shouldDeleteMails],
+      },
+    });
+  }
+
+  if (
+    unSentMails.length > 0 &&
+    unSentMails.length === addedMails.length + resendEmails.length
+  ) {
+    // this either means error sending mails or means all emails have sent their response (see line 473-476)
+    return next(
+      new AppError(
+        500,
+        "Could not send any mails, something went wrong. please try again."
+      )
+    );
+  }
+
+  campaign.recipientCount =
+    campaign.recipientCount + (addedMails.length - unSentMails.length);
+  await campaign.save();
+  // console.log(campaign);
 
   res.status(200).json({
     success: true,
-    results: docs.length,
-    data: docs,
-    message:
-      'Emails already present in campaign have been removed automatically',
+    data: { campaign, addedMails, unAddedMails, sentMails, unSentMails },
+    message: "Mails sent!",
   });
 });
 
@@ -219,7 +292,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
 
   const bodyQuestions = body.questions;
   const noIndexItem = bodyQuestions.find(
-    (el) => el.hasOwnProperty('index') === false
+    (el) => el.hasOwnProperty("index") === false
   );
   if (noIndexItem) {
     return next(
@@ -253,22 +326,22 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
   for (const question of orderedBodyQuestions) {
     const feedbackType = question.type;
     const hasChoices =
-      feedbackType === 'checkbox' ||
-      feedbackType === 'range' ||
-      feedbackType === 'radio' ||
-      feedbackType === 'date' ||
-      feedbackType === 'number';
+      feedbackType === "checkbox" ||
+      feedbackType === "range" ||
+      feedbackType === "radio" ||
+      feedbackType === "date" ||
+      feedbackType === "number";
 
     if (hasChoices) {
       let errorMessage;
       if (
-        feedbackType === 'range' &&
+        feedbackType === "range" &&
         (!question.choices.length || question.choices.length !== 3)
       ) {
         errorMessage = `Question is of type : ${feedbackType}. Choices should be an array of size 3 (start, stop & step of the range)`;
       }
 
-      if (feedbackType === 'date') {
+      if (feedbackType === "date") {
         const start = new Date(question.choices[0]);
         const stop = new Date(question.choices[1]);
         if (start > stop) {
@@ -277,7 +350,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
       }
 
       if (
-        feedbackType === 'number' &&
+        feedbackType === "number" &&
         (!question.choices.length || question.choices.length !== 2)
       ) {
         errorMessage = `Question is of type : ${feedbackType}. Limits should be an array of size 2 (min & max values allowed)`;
@@ -296,14 +369,14 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
     }
 
     //save question and add choice id to campaignQuestions array;
-    if (question.hasOwnProperty('_id')) {
+    if (question.hasOwnProperty("_id")) {
       const existingQuestionInd = shouldBeDeletedQuestions.findIndex(
         (el) => String(el._id) === question._id
       );
 
       if (existingQuestionInd !== -1) {
         const updateId = shouldBeDeletedQuestions[existingQuestionInd]._id;
-        if (question.hasOwnProperty('isUpdated') && question.isUpdated) {
+        if (question.hasOwnProperty("isUpdated") && question.isUpdated) {
           await Question.findByIdAndUpdate(updateId, {
             ...question,
           });
@@ -341,7 +414,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
   await campaign.save();
 
   const updatedCampaign = await Campaign.populate(campaign, {
-    path: 'campaignQuestions',
+    path: "campaignQuestions",
   });
   updatedCampaign.toObject();
 
@@ -359,7 +432,7 @@ exports.campaignQuestions = catchAsync(async (req, res, next) => {
 exports.getCampaign = catchAsync(async (req, res, next) => {
   // get one campaign
   const reqCampaign = await Campaign.findById(req.params.id)
-    .populate('campaignQuestions')
+    .populate("campaignQuestions")
     .lean();
 
   reqCampaign.campaignQuestions = reqCampaign.campaignQuestions.sort(
@@ -368,13 +441,13 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
 
   if (!reqCampaign || String(reqCampaign.user) !== req.user.id) {
     return next(
-      new AppError(400, 'No campaign with that id exists in your campaigns')
+      new AppError(400, "No campaign with that id exists in your campaigns")
     );
   }
 
   const campaignEmails = await CampaignEmail.find({
     campaign: req.params.id,
-  }).select('email sent');
+  }).select("email sent");
   reqCampaign.campaignEmails = campaignEmails;
 
   return res.status(200).json({
@@ -386,7 +459,7 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
 exports.myCampaigns = catchAsync(async (req, res, next) => {
   // get my campaigns
   const campaigns = await Campaign.find({ user: req.user.id })
-    .populate('campaignQuestions')
+    .populate("campaignQuestions")
     .lean();
 
   return res.status(200).json({
@@ -416,7 +489,7 @@ exports.updateCampaign = catchAsync(async (req, res, next) => {
     (so these are the fields that cannot be directly updated as 
     they delete the existing emails and questions in the campaign) 
   */
-  const discardProps = ['campaignEmails', 'campaignQuestions'];
+  const discardProps = ["campaignEmails", "campaignQuestions"];
   discardProps.forEach((el) => {
     if (body.hasOwnProperty(el)) {
       delete body[el];
@@ -507,56 +580,42 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
     campaign_id in req.body; 
   */
   const campaign = await Campaign.findById(campaign_id).populate(
-    'campaignQuestions'
+    "campaignQuestions"
   );
   // console.log(campaign);
 
   if (!campaign) {
-    return next(new AppError(400, 'Campaign not found.'));
+    return next(new AppError(400, "Campaign not found."));
   }
 
   if (!campaign || String(campaign.user) !== req.user.id) {
-    throw new AppError(400, 'There is no such campaign in your campaigns');
+    throw new AppError(400, "There is no such campaign in your campaigns");
   }
 
   //find associated emails
   const emails = await CampaignEmail.find({
     campaign: campaign_id,
     sent: false,
-  }).select('email');
+  }).select("email");
   // console.log(emails);
 
   const emailsArr = emails.map((emailObj) => emailObj.email);
   if (emailsArr.length === 0) {
-    return next(new AppError(400, 'No emails found'));
+    return next(new AppError(400, "No emails found"));
   }
 
-  const from = `${req.user.email}`;
-  // const to = emailsArr;
-  const subject = campaign.emailSubject;
-  const html = createForm.createForm(campaign);
-  const unSentEmails = [];
-  let to, mailSent, userHtml, websiteLink;
-
-  for (let i = 0; i < emailsArr.length; i++) {
-    to = emailsArr[i];
-    websiteLink = encodeEmailFeedbackLink(campaign_id, emailsArr[i]);
-    userHtml = html
-      .replace('{%EMAIL%}', to)
-      .replace('{%WEBSITE-LINK%}', websiteLink);
-    mailSent = await sendMail(from, to, subject, userHtml);
-
-    if (!mailSent) {
-      unSentEmails.push(to);
-    }
-  }
+  const { unSentEmails, sentMails } = sendMails(
+    `${req.user.email}`,
+    campaign,
+    emailsArr
+  );
 
   // this either means error sending mails or means all emails have sent their response (see line 473-476)
   if (unSentEmails.length === emailsArr.length) {
     return next(
       new AppError(
         500,
-        'Could not send mails, something went wrong. please try again.'
+        "Could not send mails, something went wrong. please try again."
       )
     );
   }
@@ -568,8 +627,8 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: { launchedAt: campaign.launchedAt, unSentEmails },
-    message: 'Mails were succesfully sent.',
+    data: { launchedAt: campaign.launchedAt, sentMails, unSentEmails },
+    message: "Mails were succesfully sent.",
   });
 });
 
@@ -596,7 +655,7 @@ exports.decodeQuery = (req, res, next) => {
     console.log(error);
     res.status(400).json({
       success: false,
-      message: 'Something went wrong.',
+      message: "Something went wrong.",
     });
   }
 };
@@ -606,15 +665,15 @@ exports.decodeUser = catchAsync(async (req, res, next) => {
     const { cipher } = req.body;
     let obj = Cipher.decrypt(cipher);
     obj = JSON.parse(obj);
-    if (!obj.hasOwnProperty('campaign') || !obj.hasOwnProperty('email')) {
-      return next(new AppError(400, 'Malformed URL'));
+    if (!obj.hasOwnProperty("campaign") || !obj.hasOwnProperty("email")) {
+      return next(new AppError(400, "Malformed URL"));
     }
     const campaign = await Campaign.findById(obj.campaign).populate(
-      'campaignQuestions'
+      "campaignQuestions"
     );
 
     if (!campaign) {
-      return next(new AppError(400, 'No campaign exists with that ID.'));
+      return next(new AppError(400, "No campaign exists with that ID."));
     }
 
     return res.status(200).json({
@@ -625,7 +684,7 @@ exports.decodeUser = catchAsync(async (req, res, next) => {
     console.log(error);
     res.status(400).json({
       success: false,
-      message: 'Something went wrong.',
+      message: "Something went wrong.",
     });
   }
 });
@@ -671,7 +730,7 @@ exports.response = async (req, res) => {
 
     /* get campaign and questions */
     const campaign = await Campaign.findById(body.campaign_id).populate(
-      'campaignQuestions'
+      "campaignQuestions"
     );
     const questions = campaign.campaignQuestions;
 
@@ -681,21 +740,21 @@ exports.response = async (req, res) => {
       const question = questions[i];
       const { type } = question;
 
-      if (body.hasOwnProperty(question.id) && body[question.id] !== '') {
+      if (body.hasOwnProperty(question.id) && body[question.id] !== "") {
         /* make checks for questions with choices */
         const answer = [];
 
         if (
-          type == 'checkbox' ||
-          type == 'range' ||
-          type == 'radio' ||
-          type == 'number' ||
-          type == 'date'
+          type == "checkbox" ||
+          type == "range" ||
+          type == "radio" ||
+          type == "number" ||
+          type == "date"
         ) {
           let questionResponse = body[question.id];
 
           // range
-          if (type === 'range') {
+          if (type === "range") {
             questionResponse = parseInt(questionResponse);
 
             if (
@@ -714,7 +773,7 @@ exports.response = async (req, res) => {
           }
 
           // radio
-          else if (type == 'radio') {
+          else if (type == "radio") {
             if (!question.choices.find((el) => el === questionResponse)) {
               // return res.status(400).json({
               //   success: false,
@@ -739,9 +798,9 @@ exports.response = async (req, res) => {
           }
 
           // checkbox
-          else if (type == 'checkbox') {
+          else if (type == "checkbox") {
             if (
-              typeof questionResponse === 'string' ||
+              typeof questionResponse === "string" ||
               questionResponse instanceof String
             ) {
               questionResponse = [questionResponse];
@@ -756,7 +815,7 @@ exports.response = async (req, res) => {
           }
 
           // number
-          else if (type === 'number') {
+          else if (type === "number") {
             questionResponse = parseInt(questionResponse);
 
             if (
@@ -894,7 +953,7 @@ exports.responseGet = catchAsync(async (req, res) => {
 
     /* get campaign and questions */
     const campaign = await Campaign.findById(body.campaign_id).populate(
-      'campaignQuestions'
+      "campaignQuestions"
     );
     const questions = campaign.campaignQuestions;
 
@@ -904,21 +963,21 @@ exports.responseGet = catchAsync(async (req, res) => {
       const question = questions[i];
       const { type } = question;
 
-      if (body.hasOwnProperty(question.id) && body[question.id] !== '') {
+      if (body.hasOwnProperty(question.id) && body[question.id] !== "") {
         /* make checks for questions with choices */
         const answer = [];
 
         if (
-          type == 'checkbox' ||
-          type == 'range' ||
-          type == 'radio' ||
-          type == 'number' ||
-          type == 'date'
+          type == "checkbox" ||
+          type == "range" ||
+          type == "radio" ||
+          type == "number" ||
+          type == "date"
         ) {
           let questionResponse = body[question.id];
 
           // range
-          if (type === 'range') {
+          if (type === "range") {
             questionResponse = parseInt(questionResponse);
 
             if (
@@ -937,7 +996,7 @@ exports.responseGet = catchAsync(async (req, res) => {
           }
 
           // radio
-          else if (type == 'radio') {
+          else if (type == "radio") {
             if (!question.choices.find((el) => el === questionResponse)) {
               // return res.status(400).json({
               //   success: false,
@@ -962,9 +1021,9 @@ exports.responseGet = catchAsync(async (req, res) => {
           }
 
           // checkbox
-          else if (type == 'checkbox') {
+          else if (type == "checkbox") {
             if (
-              typeof questionResponse === 'string' ||
+              typeof questionResponse === "string" ||
               questionResponse instanceof String
             ) {
               questionResponse = [questionResponse];
@@ -979,7 +1038,7 @@ exports.responseGet = catchAsync(async (req, res) => {
           }
 
           // number
-          else if (type === 'number') {
+          else if (type === "number") {
             questionResponse = parseInt(questionResponse);
 
             if (
@@ -1079,7 +1138,7 @@ exports.getResponses = catchAsync(async (req, res) => {
 exports.getSummary = catchAsync(async (req, res, next) => {
   /* get campaign */
   const campaign = await Campaign.findById(req.params.id)
-    .populate('campaignQuestions')
+    .populate("campaignQuestions")
     .lean();
 
   if (
@@ -1087,7 +1146,7 @@ exports.getSummary = catchAsync(async (req, res, next) => {
     campaign.respondedRecipientCount === 0 ||
     campaign.recipientCount === 0
   ) {
-    return next(new AppError(400, 'No responses for this campaign.'));
+    return next(new AppError(400, "No responses for this campaign."));
   }
 
   /* get reponses for that campaign */
@@ -1113,7 +1172,7 @@ exports.getSummary = catchAsync(async (req, res, next) => {
   }
   // console.log('Time elapsed : ', (Date.now() - start) / 1000);
   const feedbacksObj = await Feedback.find({ campaign: req.params.id })
-    .populate('responses')
+    .populate("responses")
     .lean();
 
   res.status(200).json({
@@ -1134,7 +1193,7 @@ const calcSummary = (question, responses) => {
   stats = {};
 
   /* for type = number */
-  if (question.type === 'number') {
+  if (question.type === "number") {
     let max = (min = parseInt(responses[0].answer));
     let sum = min,
       valCounts = {};
@@ -1170,9 +1229,9 @@ const calcSummary = (question, responses) => {
     stats.valCounts = valCounts;
   } else if (
     /* for type = range, checkbox, radio */
-    question.type === 'range' ||
-    question.type === 'checkbox' ||
-    question.type === 'radio'
+    question.type === "range" ||
+    question.type === "checkbox" ||
+    question.type === "radio"
   ) {
     let responsesArr = [];
     for (let i = 0; i < responses.length; i++) {
@@ -1186,7 +1245,7 @@ const calcSummary = (question, responses) => {
     );
     stats.valCounts = valCountsAndOrder[0];
     stats.valCountOrdered = valCountsAndOrder[1];
-  } else if (question.type === 'date') {
+  } else if (question.type === "date") {
     /* for type = date */
     const daysGap =
       (new Date(question.choices[1]).getTime() -
@@ -1210,11 +1269,11 @@ const calcSummary = (question, responses) => {
   }
 
   // for type = text
-  else if (question.type === 'text') {
+  else if (question.type === "text") {
     const valCounts = {};
     for (let i = 0; i < responses.length; i++) {
       // const response = String(responses[i].answer);
-      let responseArr = String(responses[i].answer).split(' ');
+      let responseArr = String(responses[i].answer).split(" ");
       responseArr = responseArr.filter((el) => el.length > 4);
 
       if (responseArr.length > 40) {
@@ -1299,3 +1358,26 @@ const orderValCounts = (valCounts) => {
 
   return valCountKeys;
 };
+async function sendMails(from, campaign, newEmails) {
+  const subject = campaign.emailSubject;
+  const html = createForm.createForm(campaign);
+  const unSentMails = [];
+  const sentMails = [];
+  let to, mailSent, userHtml, websiteLink;
+
+  for (let i = 0; i < newEmails.length; i++) {
+    to = newEmails[i];
+    websiteLink = encodeEmailFeedbackLink(campaign._id, newEmails[i]);
+    userHtml = html
+      .replace("{%EMAIL%}", to)
+      .replace("{%WEBSITE-LINK%}", websiteLink);
+    mailSent = await sendMail(from, to, subject, userHtml);
+
+    if (!mailSent) {
+      unSentMails.push(to);
+    } else {
+      sentMails.push(to);
+    }
+  }
+  return { unSentMails, sentMails };
+}

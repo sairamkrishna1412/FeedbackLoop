@@ -1,24 +1,26 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { Redirect, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect, useParams } from "react-router-dom";
 // import SummaryItem from '../../components/Summary/SummaryItem';
-import Header from '../../components/UI/Header/Header';
-import Loader from '../../components/UI/Loader/Loader';
-import Container from '../../components/UI/Container/Container';
-import NavItem from '../../components/UI/NavItem/NavItem';
-import QuestionSummary from '../../components/Summary/QuestionSummary/QuestionSummary';
-import QuestionResponses from '../../components/Summary/QuestionResponses/QuestionResponses';
-import { useEffect, useState } from 'react';
+import Header from "../../components/UI/Header/Header";
+import Loader from "../../components/UI/Loader/Loader";
+import Container from "../../components/UI/Container/Container";
+import NavItem from "../../components/UI/NavItem/NavItem";
+import QuestionSummary from "../../components/Summary/QuestionSummary/QuestionSummary";
+import QuestionResponses from "../../components/Summary/QuestionResponses/QuestionResponses";
+import { React, useEffect, useState } from "react";
 
-import styles from './CampaignSummary.module.css';
-import { userThunks } from '../../store/userSlice';
-import Feedbacks from '../../components/Summary/Feedbacks/Feedbacks';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styles from "./CampaignSummary.module.css";
+import { userActions, userThunks } from "../../store/userSlice";
+import Feedbacks from "../../components/Summary/Feedbacks/Feedbacks";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faQuestion,
   faPaperPlane,
   faComment,
   faComments,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
+import { Dialog } from "../../components/UI/Dialog/Dialog";
+import MoreRecipients from "../../components/Summary/MoreRecipients/MoreRecipients";
 
 function CampaignSummary() {
   const dispatch = useDispatch();
@@ -26,13 +28,15 @@ function CampaignSummary() {
   const isPageLoading = useSelector((state) => state.ui.pageLoading);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const campaign = useSelector((state) => state.user.visibleCampaign);
-  const [activeItem, setActiveItem] = useState('Summary');
+  const [activeItem, setActiveItem] = useState("Summary");
+  const [dialog, setDialog] = useState("NONE");
+  const [reloadSummary, setReloadSummary] = useState(false);
   // console.log(campaign);
   // console.log(activeItem);
 
   useEffect(() => {
     dispatch(userThunks.getCampaignSummary(id));
-  }, [dispatch, id]);
+  }, [dispatch, id, reloadSummary]);
   // const campaign = useSelector((state) =>
   //   state.user.campaigns.find((el) => el._id === id)
   // );
@@ -50,10 +54,10 @@ function CampaignSummary() {
 
   if (
     campaign &&
-    campaign.hasOwnProperty('launchedAt') &&
+    campaign.hasOwnProperty("launchedAt") &&
     !campaign.launchedAt
   ) {
-    if (campaign.hasOwnProperty('_id')) {
+    if (campaign.hasOwnProperty("_id")) {
       return <Redirect to={`/newCampaign/${campaign._id}`}></Redirect>;
     }
   }
@@ -123,9 +127,44 @@ function CampaignSummary() {
     );
   }
 
+  const extendCampaignHandler = (e) => {
+    if (campaign) {
+      setDialog("RECIPIENTS");
+    }
+  };
+
+  const finalRecipientsHandler = async (finalRecipients) => {
+    console.log(finalRecipients);
+    setDialog("NONE");
+    const response = await dispatch(
+      userThunks.extendCampaignEmails(campaign._id, finalRecipients)
+    );
+    //response : if not undefined || null , consists of addedMails, unAddedMail, sentMails, unSentMails.
+    //should show user concatenation of unAdded and unSentMails.
+    console.log(response);
+    setReloadSummary((prevState) => !prevState);
+  };
+
+  let dialogJsx;
+  switch (dialog) {
+    case "RECIPIENTS":
+      dialogJsx = (
+        <Dialog onClose={() => setDialog("NONE")}>
+          <MoreRecipients
+            campaign={campaign}
+            finalRecipients={finalRecipientsHandler}
+          ></MoreRecipients>
+        </Dialog>
+      );
+      break;
+    default:
+      dialogJsx = null;
+  }
+
   return (
     <div className={`!w-[95%] sm:!w-[90%] md:!w-[80%] 2xl:!w-[70%] mx-auto`}>
       <Header></Header>
+      {dialogJsx}
       <div className={styles.newBlock}>
         <h2 className="subHeading">Summary</h2>
         <div className={`${styles.quickSummary}`}>
@@ -163,7 +202,7 @@ function CampaignSummary() {
               </div>
               <span className="text-[16px] lg:text-[18px]">
                 {new Date(campaign.createdAt).toLocaleString(undefined, {
-                  dateStyle: 'long',
+                  dateStyle: "long",
                 })}
               </span>
             </div>
@@ -261,7 +300,7 @@ function CampaignSummary() {
               </div>
               <span className="text-[16px] lg:text-[18px]">
                 {new Date(campaign.createdAt).toLocaleString(undefined, {
-                  dateStyle: 'long',
+                  dateStyle: "long",
                 })}
               </span>
             </div>
@@ -282,28 +321,51 @@ function CampaignSummary() {
           ></SummaryItem>
         </div> */}
       </div>
+      <h2 className="subHeading">Quick Actions</h2>
+      <Container>
+        <div
+          className={`flex justify-between sm:justify-around px-10 sm:px-4 py-8 rounded-2xl text-[16px] sm:text-[18px]`}
+        >
+          <div className="flex items-center gap-3">
+            <span className="font-medium text-[16px] sm:text-[18px]">
+              Add more people to campaign
+            </span>
+          </div>
+          <div>
+            <button
+              onClick={extendCampaignHandler}
+              className="text-white flex items-center gap-3 font-bold p-3 text-center text-[16px] shadow-lg rounded-xl bg-blue-500 hover:shadow-xl hover:-translate-y-1 transition-all"
+            >
+              <span>Add</span>
+              <div className="text-slate-100 p-3 text-center inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-300 text-xl">
+                <FontAwesomeIcon icon={faPaperPlane}></FontAwesomeIcon>
+              </div>
+            </button>
+          </div>
+        </div>
+      </Container>
       <h2 className="subHeading">Stats</h2>
       <Container>
         <div className=" grid grid-cols-3 text-center text-3xl">
           <NavItem
             title="Summary"
-            active={activeItem === 'Summary'}
+            active={activeItem === "Summary"}
             onClickHandler={activeChangeHandler}
           ></NavItem>
           <NavItem
             title="Question Responses"
-            active={activeItem === 'Question Responses'}
+            active={activeItem === "Question Responses"}
             onClickHandler={activeChangeHandler}
           ></NavItem>
           <NavItem
             title="Feedbacks"
-            active={activeItem === 'Feedbacks'}
+            active={activeItem === "Feedbacks"}
             onClickHandler={activeChangeHandler}
           ></NavItem>
         </div>
-        <div>{activeItem === 'Summary' && summariesJsx}</div>
-        <div>{activeItem === 'Question Responses' && questionResponsesJsx}</div>
-        <div>{activeItem === 'Feedbacks' && feedbacksJsx}</div>
+        <div>{activeItem === "Summary" && summariesJsx}</div>
+        <div>{activeItem === "Question Responses" && questionResponsesJsx}</div>
+        <div>{activeItem === "Feedbacks" && feedbacksJsx}</div>
         {/* <div className={styles.whiteBlock}></div>
         <div className={styles.whiteBlock}></div>
         <div className={styles.whiteBlock}></div> */}

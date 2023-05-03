@@ -1,22 +1,23 @@
-import axios from 'axios';
-import { createSlice } from '@reduxjs/toolkit';
+import axios from "axios";
+import { createSlice } from "@reduxjs/toolkit";
 
-import { uiActions } from './uiSlice';
+import { uiActions } from "./uiSlice";
+import { Promise } from "mongoose";
 
 //setting it to empty instead of null will make sure there is no exception with calling its attributes when it is empty
 const initialState = {
   campaigns: [],
   visibleCampaign: {},
   newCampaign: {
-    campaignName: '',
-    emailSubject: '',
-    previewText: '',
-    emailContent: '',
+    campaignName: "",
+    emailSubject: "",
+    previewText: "",
+    emailContent: "",
   },
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setCampaigns: (state, action) => {
@@ -44,6 +45,19 @@ const userSlice = createSlice({
         state.campaigns.push(campaign);
       }
     },
+    addCampaignEmails: (state, action) => {
+      const { newEmails } = action.payload;
+      const reqCampIndex = state.campaigns.findIndex(
+        (el) => el._id === action.payload.campaign._id
+      );
+
+      if (reqCampIndex !== -1) {
+        if (state?.campaigns[reqCampIndex]?.campaignEmails) {
+          state.campaigns[reqCampIndex].campaignEmails =
+            state.campaigns[reqCampIndex].campaignEmails.concat(newEmails);
+        }
+      }
+    },
     setVisibleCampaign: (state, action) => {
       const campaign = action.payload;
       if (campaign) {
@@ -66,7 +80,7 @@ export const userThunks = {
     return async function (dispatch) {
       try {
         dispatch(uiActions.startLoading());
-        const response = await axios.get('/api/campaign/myCampaigns');
+        const response = await axios.get("/api/campaign/myCampaigns");
         if (response.status === 200 && response.data.success) {
           // divide the campaigns into lauched, unlaunched. (active, inactive : later)
           const campaigns = response.data.data;
@@ -161,7 +175,7 @@ export const userThunks = {
         }
         if (Object.keys(resCampaign).length) {
           if (
-            campaign.hasOwnProperty('_id') &&
+            campaign.hasOwnProperty("_id") &&
             campaign._id === resCampaign._id
           ) {
             // console.log('updating');
@@ -183,10 +197,10 @@ export const userThunks = {
     return async function (dispatch) {
       dispatch(
         userActions.setNewCampaign({
-          campaignName: '',
-          emailSubject: '',
-          previewText: '',
-          emailContent: '',
+          campaignName: "",
+          emailSubject: "",
+          previewText: "",
+          emailContent: "",
         })
       );
     };
@@ -203,7 +217,7 @@ export const userThunks = {
         // console.log(response);
         if (response.status === 200 && response.data.success) {
           const campaign = response.data.data;
-          console.log('updated campaign : ', campaign);
+          console.log("updated campaign : ", campaign);
           dispatch(userActions.updateCampaign(campaign));
         }
         dispatch(uiActions.stopLoading());
@@ -233,6 +247,7 @@ export const userThunks = {
         dispatch(uiActions.stopLoading());
       } catch (error) {
         dispatch(uiActions.stopLoading());
+        console.error(error);
       }
     };
   },
@@ -260,6 +275,33 @@ export const userThunks = {
       } catch (error) {
         console.log(error);
         dispatch(uiActions.stopLoading());
+      }
+    };
+  },
+
+  extendCampaignEmails: (campaignId, campaignEmails) => {
+    return async function (dispatch, getState) {
+      try {
+        dispatch(uiActions.startLoading());
+        const response = await axios.post(`/api/campaign/sendMore`, {
+          campaignId,
+          campaignEmails,
+        });
+        if (response.status === 200 && response.data.success) {
+          // const currentCampaign = JSON.parse(
+          //   JSON.stringify(getState().visibleCampaign)
+          // );
+          // currentCampaign.campaignEmails =
+          //   currentCampaign.campaignEmails.concat(response.data.data);
+
+          dispatch(userActions.updateCampaign(response.data.data.campaign));
+          // dispatch(userActions.setVisibleCampaign(response.data.data.campaign));
+        }
+        dispatch(uiActions.stopLoading());
+        return dispatch({ data: response?.data?.data });
+      } catch (error) {
+        dispatch(uiActions.stopLoading());
+        console.error(error);
       }
     };
   },
