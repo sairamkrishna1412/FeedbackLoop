@@ -2,7 +2,6 @@ import axios from "axios";
 import { createSlice } from "@reduxjs/toolkit";
 
 import { uiActions } from "./uiSlice";
-import { Promise } from "mongoose";
 
 //setting it to empty instead of null will make sure there is no exception with calling its attributes when it is empty
 const initialState = {
