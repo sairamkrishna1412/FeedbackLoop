@@ -6,14 +6,13 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build"
+    "debug": "DEBUG=express:* nodemon index.js",
+    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
+    "render-ui-build": "cd client && npm install --only=dev && npm install && npm run build"
   },
   "author": "Sai",
   "license": "ISC",
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.36",
-    "@fortawesome/free-solid-svg-icons": "^5.15.4",
-    "@fortawesome/react-fontawesome": "^0.1.15",
     "cookie-parser": "^1.4.5",
     "cookie-session": "^1.4.0",
     "cors": "^2.8.5",
