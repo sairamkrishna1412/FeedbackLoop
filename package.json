@@ -7,9 +7,12 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "debug": "DEBUG=express:* nodemon index.js",
-    "render": "nodemon index.js && npm start --prefix client",
     "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
-    "render-build": "cd client && npm install --only=dev && npm install && npm run build"
+    "render-ui-notworking-build": "cd client && npm install --only=dev && npm install && npm run build",
+    
+    "client": "npm start --prefix client",
+    "render": "concurrently \"npm run dev\" \"npm run client\"",
+    "render-ui-build": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "author": "Sai",
   "license": "ISC",
@@ -26,6 +29,10 @@
     "passport-google-oauth20": "^2.0.0",
     "stripe": "^8.184.0",
     "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "concurrently": "^7.3.0",
+    "nodemon": "^2.0.22"
   },
   "engines": {
     "node": "14.15.4",
