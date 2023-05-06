@@ -12,7 +12,7 @@
     
     "client": "npm start --prefix client",
     "render": "npm run render-ui-build && npm run start",
-    "render-ui-build": "npm install --prefix client && npm run build --prefix client"
+    "render-build": "npm install && npm install --prefix client --only=dev &&  npm install --prefix client && npm run build --prefix client"
   },
   "author": "Sai",
   "license": "ISC",
