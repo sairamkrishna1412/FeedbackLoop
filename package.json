@@ -7,8 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "debug": "DEBUG=express:* nodemon index.js",
+    "render": "nodemon index.js && npm start --prefix client",
     "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
-    "render-ui-build": "cd client && npm install --only=dev && npm install && npm run build"
+    "render-build": "cd client && npm install --only=dev && npm install && npm run build"
   },
   "author": "Sai",
   "license": "ISC",
