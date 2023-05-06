@@ -59,7 +59,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /* static() : used to serve static files. here it points to build folder in client directory */
-// app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 /* authentication routes */
 app.use('/auth', authRoutes);
@@ -86,8 +86,6 @@ app.get('/api/user', (req, res) => {
 /* for all other routes we just send a dummy file */
 // VERY IMPORTANT FOR SERVING FILES TO FRONTEND.
 app.get('*', (req, res) => {
-  //*Set static folder up in production
-  app.use(express.static("client/build"));
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 

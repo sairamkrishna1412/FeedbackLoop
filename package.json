@@ -11,8 +11,8 @@
     "render-ui-notworking-build": "cd client && npm install --only=dev && npm install && npm run build",
     
     "client": "npm start --prefix client",
-    "render": "concurrently \"npm run dev\" \"npm run client\"",
-    "render-ui-build": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "render": "npm run render-ui-build && npm run start",
+    "render-build": "npm install && npm install --prefix client --only=dev &&  npm install --prefix client && npm run build --prefix client"
   },
   "author": "Sai",
   "license": "ISC",
