@@ -604,14 +604,14 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
     return next(new AppError(400, "No emails found"));
   }
 
-  const { unSentEmails, sentMails } = sendMails(
+  const { unSentMails, sentMails } = await sendMails(
     `${req.user.email}`,
     campaign,
     emailsArr
   );
 
   // this either means error sending mails or means all emails have sent their response (see line 473-476)
-  if (unSentEmails.length === emailsArr.length) {
+  if (unSentMails.length === emailsArr.length) {
     return next(
       new AppError(
         500,
@@ -620,14 +620,14 @@ exports.launchCampaign = catchAsync(async (req, res, next) => {
     );
   }
 
-  campaign.recipientCount = emailsArr.length - unSentEmails.length;
+  campaign.recipientCount = emailsArr.length - unSentMails.length;
   campaign.launchedAt = Date.now();
   await campaign.save();
   // console.log(campaign);
 
   res.status(200).json({
     success: true,
-    data: { launchedAt: campaign.launchedAt, sentMails, unSentEmails },
+    data: { launchedAt: campaign.launchedAt, sentMails, unSentMails },
     message: "Mails were succesfully sent.",
   });
 });
